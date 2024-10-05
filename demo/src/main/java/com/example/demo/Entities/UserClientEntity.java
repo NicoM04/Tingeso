@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-//@Table(name = "userclient")
+@Table(name = "userclient")
 
 
 @Data
@@ -14,7 +14,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 public class UserClientEntity extends UserEntity {
-
-
     private double monthlyIncome;
 }

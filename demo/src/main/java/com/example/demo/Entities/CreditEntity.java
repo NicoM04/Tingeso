@@ -17,7 +17,7 @@ public class CreditEntity {
     private Long id;
 
     private int typeLoan;
-    private double amount;
+    private int amount;
     private int dueDate;  // years
     private double interestRate; //years
     private int state; // "Simulacion", "Solicitado", "Aprobado", "Rechazado", "Activo"

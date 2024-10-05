@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-//@Table(name = "userejecutive")
+@Table(name = "userejecutive")
 
 @Data
 @NoArgsConstructor
