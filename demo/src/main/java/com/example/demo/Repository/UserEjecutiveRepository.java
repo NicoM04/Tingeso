@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 
 public interface UserEjecutiveRepository extends JpaRepository<UserEjecutiveEntity,Long> {
-
+    public UserEjecutiveEntity findByRut(String rut);
 }

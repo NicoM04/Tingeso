@@ -1,5 +1,6 @@
 package com.example.demo.Services;
 
+import com.example.demo.Entities.UserClientEntity;
 import com.example.demo.Entities.UserEjecutiveEntity;
 import com.example.demo.Repository.UserEjecutiveRepository;
 import org.apache.catalina.User;
@@ -13,19 +14,24 @@ import java.util.ArrayList;
 public class UserEjecutiveService {
     @Autowired
     UserEjecutiveRepository ejecutiveRepository;
-    public ArrayList<UserEjecutiveEntity> getEmployees(){
+    public ArrayList<UserEjecutiveEntity> getEjecutives(){
         return (ArrayList<UserEjecutiveEntity>) ejecutiveRepository.findAll();
     }
-
-    public UserEjecutiveEntity saveEmployee(UserEjecutiveEntity userEjecutive){
+    public UserEjecutiveEntity getUserEById(Long id){
+        return ejecutiveRepository.findById(id).get();
+    }
+    public UserEjecutiveEntity getUserEByRut(String rut){
+        return ejecutiveRepository.findByRut(rut);
+    }
+    public UserEjecutiveEntity saveEjecutive(UserEjecutiveEntity userEjecutive){
         return ejecutiveRepository.save(userEjecutive);
     }
 
-    public UserEjecutiveEntity updateEmployee(UserEjecutiveEntity userEjecutive) {
+    public UserEjecutiveEntity updateEjecutive(UserEjecutiveEntity userEjecutive) {
         return ejecutiveRepository.save(userEjecutive);
     }
 
-    public boolean deleteEmployee(Long id) throws Exception {
+    public boolean deleteEjecutive(Long id) throws Exception {
         try{
             ejecutiveRepository.deleteById(id);
             return true;

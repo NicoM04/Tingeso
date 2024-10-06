@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 
 public interface UserRepository extends JpaRepository<UserEntity,Long> {
-
+    public UserEntity findByRut(String rut);
 
 }
