@@ -46,6 +46,26 @@ public class CreditService {
 
     }
 
+    // Calcula la cuota mensual según la fórmula proporcionada
+    public double calculateMonthlyPayment(double loanAmount, double annualInterestRate, int termInYears) {
+        double monthlyInterestRate = annualInterestRate / 12 / 100;  // Convertir la tasa anual a tasa mensual
+        int numberOfPayments = termInYears * 12;  // Número total de pagos (meses)
+
+        // Fórmula para calcular la cuota mensual
+        return (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -numberOfPayments));
+    }
+
+    // Realizar la simulación del crédito
+    public CreditEntity simulateCredit(CreditEntity credit) {
+        double monthlyPayment = calculateMonthlyPayment(
+                credit.getAmount(),
+                credit.getInterestRate(),
+                credit.getDueDate()
+        );
+        credit.setMonthlyPayment(monthlyPayment);
+        return credit;
+    }
+
 
 
 

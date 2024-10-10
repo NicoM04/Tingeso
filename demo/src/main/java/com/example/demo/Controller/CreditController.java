@@ -61,5 +61,18 @@ public class CreditController {
     //creo q esta mal esto
 
 
+    // para simular un crédito (esto lo deberian tener ambos users?)
+    @PostMapping("/simulate")
+    public ResponseEntity<?> simulateCredit(@RequestBody CreditEntity credit) {
+        // Validación simple
+        if (credit.getAmount() <= 0 || credit.getInterestRate() <= 0 || credit.getDueDate() <= 0) {
+            return ResponseEntity.badRequest().body("Valores no válidos.");
+        }
+
+        CreditEntity simulatedCredit = creditService.simulateCredit(credit);
+        return ResponseEntity.ok(simulatedCredit);
+    }
+
+
 
 }
