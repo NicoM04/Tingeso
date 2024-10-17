@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.example.demo.Entities.UserClientEntity;
+
+import java.util.List;
+
 @Entity
 @Table(name = "credit")
 @Data
@@ -23,6 +26,8 @@ public class CreditEntity {
     private double monthlyPayment;  // Cuota mensual calculada
     private int state; // "Simulacion", "Solicitado", "Aprobado", "Rechazado", "Activo"
     private int idClient;
+
+    //private List<DocumentEntity> documents;  // Lista de documentos asociados al crédito
 
 
 

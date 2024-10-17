@@ -5,6 +5,7 @@ import com.example.demo.Services.CreditService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,8 +30,8 @@ public class CreditController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<CreditEntity> saveCredit(@RequestBody CreditEntity employee) {
-        CreditEntity creditNew = creditService.saveCredit(employee);
+    public ResponseEntity<CreditEntity> saveCredit(@RequestBody CreditEntity credit) {
+        CreditEntity creditNew = creditService.saveCredit(credit);
         return ResponseEntity.ok(creditNew);
     }
 
@@ -73,6 +74,19 @@ public class CreditController {
         return ResponseEntity.ok(simulatedCredit);
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<String> createCredit(@RequestBody CreditEntity credit,
+                                               @RequestParam("files") MultipartFile[] files) {
+        try {
 
+            // 2. Llamar al servicio para procesar la creación del crédito y la subida de documentos
+            creditService.createCreditWithDocuments(credit, files);
+
+            return ResponseEntity.ok("Crédito creado y documentos subidos correctamente.");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Error: " + e.getMessage());
+        }
+    }
 
 }
