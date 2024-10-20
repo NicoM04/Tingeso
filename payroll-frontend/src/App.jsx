@@ -12,6 +12,7 @@ import PaycheckCalculate from './components/PaycheckCalculate';
 import AnualReport from './components/AnualReport';
 import Profile from './components/Profile';
 import Login from './components/Login';
+import Register from './components/Register';
 //import { Login } from '@mui/icons-material';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
               <Route path="/home" element={<Home/>} />
               <Route path="/profile" element={<Profile/>} />
               <Route path="/login" element={<Login/>} />
+              <Route path="/register" element={<Register/>} />
               <Route path="/employee/list" element={<EmployeeList/>} />
               <Route path="/employee/add" element={<AddEditEmployee/>} />
               <Route path="/employee/edit/:id" element={<AddEditEmployee/>} />

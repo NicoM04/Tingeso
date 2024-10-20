@@ -1,3 +1,4 @@
+// Login.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -8,25 +9,51 @@ import {
   Backdrop,
   CircularProgress,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom"; // Importa useNavigate
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false); // Estado para controlar la carga
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true); // Activa el loading al iniciar sesión
 
-    // Aquí implementa la lógica para enviar los datos al backend
-    console.log("Email:", email);
-    console.log("Password:", password);
+    try {
+      // Enviar la solicitud de inicio de sesión al backend
+      const response = await fetch("http://localhost:8080/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ mail: email, password }), // Envía el correo y la contraseña
+      });
 
-    // Simula una solicitud al backend
-    setTimeout(() => {
-      setLoading(false); // Desactiva el loading después de un tiempo (simulación)
-      // Aquí puedes manejar la respuesta de tu backend
-    }, 2000); // Cambia esto por la llamada real al backend
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Inicio de sesión exitoso:", data);
+        
+        // Guarda el usuario en el almacenamiento local
+        localStorage.setItem("user", JSON.stringify(data));
+        
+        // Notifica manualmente que se hizo un cambio en localStorage (por compatibilidad)
+        window.dispatchEvent(new Event("storage"));
+
+        // Redirige a la página de perfil o a la página principal
+        navigate("/home"); // Cambia esto si quieres redirigir a otra página
+      } else {
+        const errorData = await response.json();
+        console.error("Error al iniciar sesión:", errorData);
+        alert("Credenciales incorrectas. Inténtalo de nuevo."); // Muestra un mensaje de error
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("Error de conexión. Inténtalo de nuevo."); // Muestra un mensaje de error en caso de fallo de conexión
+    } finally {
+      setLoading(false); // Desactiva el loading
+    }
   };
 
   return (
@@ -37,7 +64,6 @@ const Login = () => {
         alignItems="center"
         minHeight="100vh"
       >
-        {/* Usamos Paper de Material-UI para crear un cuadro estilizado */}
         <Paper elevation={3} sx={{ padding: 4, width: "400px" }}>
           <Typography variant="h5" component="h1" align="center" gutterBottom>
             Iniciar Sesión
@@ -76,7 +102,6 @@ const Login = () => {
         </Paper>
       </Box>
 
-      {/* Backdrop para oscurecer el fondo durante el login */}
       <Backdrop open={loading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <CircularProgress color="inherit" />
       </Backdrop>

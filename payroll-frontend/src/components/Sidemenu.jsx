@@ -6,19 +6,25 @@ import Divider from "@mui/material/Divider";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import PaidIcon from "@mui/icons-material/Paid";
-import CalculateIcon from "@mui/icons-material/Calculate";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
-import DiscountIcon from "@mui/icons-material/Discount";
-import HailIcon from "@mui/icons-material/Hail";
-import MedicationLiquidIcon from "@mui/icons-material/MedicationLiquid";
-import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import HomeIcon from "@mui/icons-material/Home";
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';  // Para "Simular Crédito"
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';  // Para "Solicitudes por revisar"
+import AssignmentIcon from '@mui/icons-material/Assignment'; // Para "Mis Solicitudes"
+import CreditScoreIcon from '@mui/icons-material/CreditScore'; // Para "Solicitar Crédito"
+import LoginIcon from '@mui/icons-material/Login'; // Para "Simular Crédito" sin iniciar sesión
 import { useNavigate } from "react-router-dom";
 
 export default function Sidemenu({ open, toggleDrawer }) {
   const navigate = useNavigate();
+
+  // Obtener usuario desde localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // Verificar si es un ejecutivo
+  const isEjecutive = user?.isEjecutive;
+
+  // Verificar si el usuario ha iniciado sesión
+  const isLoggedIn = !!user;
 
   const listOptions = () => (
     <Box
@@ -26,6 +32,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
       onClick={toggleDrawer(false)}
     >
       <List>
+        {/* Opción de Home para todos los usuarios */}
         <ListItemButton onClick={() => navigate("/home")}>
           <ListItemIcon>
             <HomeIcon />
@@ -35,62 +42,64 @@ export default function Sidemenu({ open, toggleDrawer }) {
 
         <Divider />
 
-        <ListItemButton onClick={() => navigate("/employee/list")}>
-          <ListItemIcon>
-            <PeopleAltIcon />
-          </ListItemIcon>
-          <ListItemText primary="Empleados" />
-        </ListItemButton>
+        {isLoggedIn && isEjecutive && (
+          <>
+            {/* Opciones visibles solo para ejecutivos */}
+            <ListItemButton onClick={() => navigate("/employee/list")}>
+              <ListItemIcon>
+                <RequestQuoteIcon />
+              </ListItemIcon>
+              <ListItemText primary="Simular Crédito" />
+            </ListItemButton>
 
-        <ListItemButton onClick={() => navigate("/extraHours/list")}>
-          <ListItemIcon>
-            <MoreTimeIcon />
-          </ListItemIcon>
-          <ListItemText primary="Horas Extra" />
-        </ListItemButton>
+            <ListItemButton onClick={() => navigate("/extraHours/list")}>
+              <ListItemIcon>
+                <AssignmentTurnedInIcon />
+              </ListItemIcon>
+              <ListItemText primary="Solicitudes por revisar" />
+            </ListItemButton>
 
-        <ListItemButton onClick={() => navigate("/paycheck/list")}>
-          <ListItemIcon>
-            <PaidIcon />
-          </ListItemIcon>
-          <ListItemText primary="Planilla Sueldos" />
-        </ListItemButton>
+            <Divider />
+          </>
+        )}
 
-        <ListItemButton onClick={() => navigate("/paycheck/calculate")}>
-          <ListItemIcon>
-            <CalculateIcon />
-          </ListItemIcon>
-          <ListItemText primary="Calcular Planilla" />
-        </ListItemButton>
-        <ListItemButton onClick={() => navigate("/reports/AnualReport")}>
-          <ListItemIcon>
-            <AnalyticsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Gráficos Planillas" />
-        </ListItemButton>
-      </List>
+        {isLoggedIn && !isEjecutive &&(
+          <>
+            {/* Opciones visibles para cualquier usuario autenticado */}
+            <ListItemButton onClick={() => navigate("/employee/discounts")}>
+              <ListItemIcon>
+                <RequestQuoteIcon />
+              </ListItemIcon>
+              <ListItemText primary="Simular Crédito" />
+            </ListItemButton>
 
-      <Divider />
+            <ListItemButton onClick={() => navigate("/paycheck/vacations")}>
+              <ListItemIcon>
+                <AssignmentIcon />
+              </ListItemIcon>
+              <ListItemText primary="Mis Solicitudes" />
+            </ListItemButton>
 
-      <List>
-        <ListItemButton onClick={() => navigate("/employee/discounts")}>
-          <ListItemIcon>
-            <DiscountIcon />
-          </ListItemIcon>
-          <ListItemText primary="Descuentos" />
-        </ListItemButton>
-        <ListItemButton onClick={() => navigate("/paycheck/vacations")}>
-          <ListItemIcon>
-            <HailIcon />
-          </ListItemIcon>
-          <ListItemText primary="Vacaciones" />
-        </ListItemButton>
-        <ListItemButton onClick={() => navigate("/paycheck/medicalleave")}>
-          <ListItemIcon>
-            <MedicationLiquidIcon />
-          </ListItemIcon>
-          <ListItemText primary="Licencias Medicas" />
-        </ListItemButton>
+            <ListItemButton onClick={() => navigate("/paycheck/medicalleave")}>
+              <ListItemIcon>
+                <CreditScoreIcon />
+              </ListItemIcon>
+              <ListItemText primary="Solicitar Crédito" />
+            </ListItemButton>
+          </>
+        )}
+
+        {!isLoggedIn && (
+          <>
+            {/* Opciones visibles para usuarios no autenticados */}
+            <ListItemButton onClick={() => navigate("/login")}>
+              <ListItemIcon>
+                <LoginIcon />
+              </ListItemIcon>
+              <ListItemText primary="Simular Crédito" />
+            </ListItemButton>
+          </>
+        )}
       </List>
     </Box>
   );
