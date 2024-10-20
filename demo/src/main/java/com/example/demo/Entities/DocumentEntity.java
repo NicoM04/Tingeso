@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.example.demo.Entities.UserClientEntity;
+
 @Entity
 @Table(name = "document")
 @Data

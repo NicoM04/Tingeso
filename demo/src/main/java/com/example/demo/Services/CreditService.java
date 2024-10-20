@@ -2,10 +2,8 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.CreditEntity;
 import com.example.demo.Entities.DocumentEntity;
-import com.example.demo.Entities.UserClientEntity;
 import com.example.demo.Repository.CreditRepository;
 import com.example.demo.Repository.DocumentRepository;
-import jakarta.persistence.Access;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -141,6 +139,166 @@ public class CreditService {
                 throw new IllegalArgumentException("Tipo de préstamo inválido.");
         }
     }
+
+
+
+    /**
+     * R1: Relación Cuota/Ingreso.
+     * La relación cuota/ingreso no debe ser mayor a un 35%. Si es mayor, la solicitud se rechaza.
+     *
+     * @param credit El crédito con la cuota mensual calculada.
+     * @param monthlyIncome Ingresos mensuales del solicitante.
+     * @return true si la relación está dentro del límite, false si es mayor a 35%.
+     */
+    public boolean checkIncomeToPaymentRatio(CreditEntity credit, double monthlyIncome) {
+        double monthlyPayment = credit.getMonthlyPayment();
+        double maxPayment = monthlyIncome * 0.35;  // 35% de los ingresos mensuales
+
+        return monthlyPayment <= maxPayment;
+    }
+
+    /**
+     * R2: Historial Crediticio del Cliente.
+     * Revisa el historial crediticio (DICOM) para ver si el cliente tiene morosidad o deudas impagas recientes.
+     *
+     * @param hasGoodCreditHistory Booleano que indica si el cliente tiene un buen historial crediticio.
+     * @return true si el historial es bueno, false si tiene morosidades graves o muchas deudas.
+     */
+    public boolean checkCreditHistory(boolean hasGoodCreditHistory) {
+        return hasGoodCreditHistory;
+    }
+
+    /**
+     * R3: Antigüedad Laboral y Estabilidad.
+     * El cliente debe tener al menos 1-2 años de antigüedad en su empleo actual.
+     * Si es trabajador independiente, se revisan los ingresos de los últimos 2 años.
+     *
+     * @param employmentYears Años en el empleo actual.
+     * @param isSelfEmployed Si el cliente es trabajador independiente.
+     * @param incomeYears Años de ingresos estables (si es trabajador independiente).
+     * @return true si cumple con la estabilidad laboral, false si no.
+     */
+    public boolean checkEmploymentStability(int employmentYears, boolean isSelfEmployed, int incomeYears) {
+        if (isSelfEmployed) {
+            // Si es independiente, revisar los últimos 2 años de ingresos estables
+            return incomeYears >= 2;
+        } else {
+            // Si es empleado, requiere al menos 1-2 años de antigüedad
+            return employmentYears >= 1;
+        }
+    }
+
+    /**
+     * R4: Relación Deuda/Ingreso.
+     * La suma de todas las deudas no debe superar el 50% de los ingresos mensuales del cliente.
+     *
+     * @param credit El crédito actual, que tiene la nueva cuota mensual.
+     * @param totalDebt Todas las deudas actuales del cliente.
+     * @param monthlyIncome Ingresos mensuales del cliente.
+     * @return true si la relación deuda/ingreso es menor al 50%, false si es mayor.
+     */
+    public boolean checkDebtToIncomeRatio(CreditEntity credit, double totalDebt, double monthlyIncome) {
+        double projectedTotalDebt = totalDebt + credit.getMonthlyPayment();  // Deuda actual + nueva cuota
+        double maxDebt = monthlyIncome * 0.50;  // No debe superar el 50% de los ingresos
+
+        return projectedTotalDebt <= maxDebt;
+    }
+
+    /**
+     * R5: Monto Máximo de Financiamiento.
+     * El banco financia un porcentaje máximo del valor de la propiedad, dependiendo del tipo de préstamo.
+     *
+     * @param credit El crédito que incluye el tipo de préstamo.
+     * @param propertyValue El valor de la propiedad.
+     * @return true si el financiamiento está dentro de los límites, false si es mayor al permitido.
+     */
+    public boolean checkMaximumLoanAmount(CreditEntity credit, double propertyValue) {
+        double maxLoanPercentage = 0.0;
+
+        // Determinar el porcentaje máximo financiable según el tipo de préstamo
+        switch (credit.getTypeLoan()) {
+            case 1:  // Primera vivienda
+                maxLoanPercentage = 0.80;
+                break;
+            case 2:  // Segunda vivienda
+                maxLoanPercentage = 0.70;
+            case 3:  // Propiedades comerciales
+                maxLoanPercentage = 0.60;
+            case 4:  // Propiedades comerciales
+                maxLoanPercentage = 0.50;
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de préstamo no válido.");
+        }
+
+        double maxFinanciamiento = propertyValue * maxLoanPercentage;
+
+        return credit.getAmount() <= maxFinanciamiento;  // El monto solicitado debe estar dentro del límite
+    }
+
+    /**
+     * R6: Edad del Solicitante.
+     * El préstamo debe terminar antes de que el solicitante tenga 75 años.
+     * Si al final del plazo está muy cerca de 75 años (a menos de 5 años), el préstamo se rechaza.
+     *
+     * @param applicantAge Edad actual del solicitante.
+     * @param loanTerm Años del plazo del préstamo.
+     * @return true si el préstamo puede terminar antes de los 75 años, false si no.
+     */
+    public boolean checkApplicantAge(int applicantAge, int loanTerm) {
+        int ageAtLoanEnd = applicantAge + loanTerm;
+        return ageAtLoanEnd <= 75 && ageAtLoanEnd >= 70;  // El solicitante debe tener margen antes de los 75 años
+    }
+
+
+
+    /*
+
+     * R7: Capacidad de Ahorro (Reglas R71 a R75).
+     * El cliente debe cumplir con diversas condiciones relacionadas con su cuenta de ahorros.
+     *
+     * @param savingsAccount El estado de cuenta de ahorros del cliente.
+     * @param requestedLoanAmount El monto del préstamo solicitado.
+     * @return true si todas las condiciones de ahorro se cumplen, false si alguna es negativa.
+
+    public boolean checkSavingsCapacity(int balance, savingsAccount, double requestedLoanAmount) {
+        boolean passed = true;
+
+        // R71: Saldo mínimo requerido (al menos 10% del monto del préstamo)
+        if ( balance < requestedLoanAmount * 0.10) {
+            passed = false;
+        }
+
+        // R72: Historial de ahorro consistente (últimos 12 meses)
+        if (savingsAccount.hasSignificantWithdrawals(12)) {  // Retiros mayores al 50% del saldo
+            passed = false;
+        }
+
+        // R73: Depósitos periódicos (al menos 5% de los ingresos mensuales)
+        if (!savingsAccount.hasRegularDeposits(5)) {
+            passed = false;
+        }
+
+        // R74: Relación saldo/años de antigüedad
+        if (savingsAccount.getAccountAgeYears() < 2) {
+            if (savingsAccount.getBalance() < requestedLoanAmount * 0.20) {
+                passed = false;
+            }
+        } else {
+            if (savingsAccount.getBalance() < requestedLoanAmount * 0.10) {
+                passed = false;
+            }
+        }
+
+        // R75: Retiros recientes (más del 30% en los últimos 6 meses)
+        if (savingsAccount.hasRecentWithdrawals(6, 0.30)) {
+            passed = false;
+        }
+
+        return passed;
+    }
+    */
+
 
 
 

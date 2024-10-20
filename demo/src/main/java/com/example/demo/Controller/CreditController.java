@@ -89,4 +89,99 @@ public class CreditController {
         }
     }
 
+
+    /**
+     * Endpoint para verificar la relación cuota/ingreso (R1)
+     * @param credit Solicitud de crédito con el monto de la cuota mensual
+     * @param monthlyIncome Ingresos mensuales del solicitante
+     * @return true si la relación es menor o igual a 35%, false si no
+     */
+    @PostMapping("/check-income-to-payment-ratio")
+    public ResponseEntity<Boolean> checkIncomeToPaymentRatio(@RequestBody CreditEntity credit,
+                                                             @RequestParam double monthlyIncome) {
+        boolean result = creditService.checkIncomeToPaymentRatio(credit, monthlyIncome);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint para verificar el historial crediticio del cliente (R2)
+     * @param hasGoodCreditHistory Indica si el cliente tiene un buen historial crediticio
+     * @return true si el historial es bueno, false si no
+     */
+    @GetMapping("/check-credit-history")
+    public ResponseEntity<Boolean> checkCreditHistory(@RequestParam boolean hasGoodCreditHistory) {
+        boolean result = creditService.checkCreditHistory(hasGoodCreditHistory);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint para verificar la estabilidad laboral del solicitante (R3)
+     * @param employmentYears Años de antigüedad en el empleo actual
+     * @param isSelfEmployed Indica si el cliente es trabajador independiente
+     * @param incomeYears Años de ingresos estables si es trabajador independiente
+     * @return true si cumple con la estabilidad laboral, false si no
+     */
+    @PostMapping("/check-employment-stability")
+    public ResponseEntity<Boolean> checkEmploymentStability(@RequestParam int employmentYears,
+                                                            @RequestParam boolean isSelfEmployed,
+                                                            @RequestParam int incomeYears) {
+        boolean result = creditService.checkEmploymentStability(employmentYears, isSelfEmployed, incomeYears);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint para verificar la relación deuda/ingreso (R4)
+     * @param credit Solicitud de crédito con la cuota mensual
+     * @param totalDebt Deuda total actual del cliente
+     * @param monthlyIncome Ingresos mensuales del cliente
+     * @return true si la relación deuda/ingreso es menor o igual a 50%, false si es mayor
+     */
+    @PostMapping("/check-debt-to-income-ratio")
+    public ResponseEntity<Boolean> checkDebtToIncomeRatio(@RequestBody CreditEntity credit,
+                                                          @RequestParam double totalDebt,
+                                                          @RequestParam double monthlyIncome) {
+        boolean result = creditService.checkDebtToIncomeRatio(credit, totalDebt, monthlyIncome);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint para verificar el monto máximo financiable (R5)
+     * @param credit Solicitud de crédito con el tipo de préstamo
+     * @param propertyValue Valor de la propiedad
+     * @return true si el monto está dentro del límite financiable, false si es mayor
+     */
+    @PostMapping("/check-maximum-loan-amount")
+    public ResponseEntity<Boolean> checkMaximumLoanAmount(@RequestBody CreditEntity credit,
+                                                          @RequestParam double propertyValue) {
+        boolean result = creditService.checkMaximumLoanAmount(credit, propertyValue);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint para verificar si el préstamo puede finalizar antes de los 75 años (R6)
+     * @param applicantAge Edad actual del solicitante
+     * @param loanTerm Plazo del préstamo en años
+     * @return true si puede finalizar antes de los 75 años, false si no
+     */
+    @GetMapping("/check-applicant-age")
+    public ResponseEntity<Boolean> checkApplicantAge(@RequestParam int applicantAge,
+                                                     @RequestParam int loanTerm) {
+        boolean result = creditService.checkApplicantAge(applicantAge, loanTerm);
+        return ResponseEntity.ok(result);
+    }
+
+    /*
+     * Endpoint para verificar la capacidad de ahorro (R7)
+     * @param savingsAccount Información de la cuenta de ahorros del cliente
+     * @param requestedLoanAmount Monto del préstamo solicitado
+     * @return true si cumple con las reglas de ahorro, false si no
+
+    @PostMapping("/check-savings-capacity")
+    public ResponseEntity<Boolean> checkSavingsCapacity(@RequestBody SavingsAccount savingsAccount,
+                                                        @RequestParam double requestedLoanAmount) {
+        boolean result = creditService.checkSavingsCapacity(savingsAccount, requestedLoanAmount);
+        return ResponseEntity.ok(result);
+    }
+     */
+
 }

@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.example.demo.Entities.UserClientEntity;
-
-import java.util.List;
 
 @Entity
 @Table(name = "credit")
