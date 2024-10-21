@@ -18,12 +18,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/documents")
+@CrossOrigin("*")
 public class DocumentController {
 
     @Autowired
     private DocumentService documentService;
 
-    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso\\files";
+    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso\\files\\";
 
     /**
      * Endpoint para subir un archivo.

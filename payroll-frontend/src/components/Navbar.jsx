@@ -68,7 +68,7 @@ export default function Navbar() {
                 <Button sx={{ color: "#fff" }}>Iniciar sesión</Button>
               </Link>
               <Link to="/register">
-                <Button color="inherit">Registrarse</Button>
+                <Button sx={{ color: "#fff" }}>Registrarse</Button>
               </Link>
             </>
           ) : ( // Si el usuario ha iniciado sesión

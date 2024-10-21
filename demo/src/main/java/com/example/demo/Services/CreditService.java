@@ -128,13 +128,13 @@ public class CreditService {
     private int getRequiredDocumentsCount(int typeLoan) {
         switch (typeLoan) {
             case 1: // Primera Vivienda
-                return 3;  // Ejemplo: 2 documentos requeridos
+                return 3;  // Ejemplo: 3 documentos requeridos
             case 2: // Segunda Vivienda
-                return 4;  // Ejemplo: 3 documentos requeridos
+                return 4;  // Ejemplo: 4 documentos requeridos
             case 3: // Propiedades Comerciales
                 return 4;  // Ejemplo: 4 documentos requeridos
             case 4: // Remodelación
-                return 3;  // Ejemplo: 2 documentos requeridos
+                return 3;  // Ejemplo: 3 documentos requeridos
             default:
                 throw new IllegalArgumentException("Tipo de préstamo inválido.");
         }

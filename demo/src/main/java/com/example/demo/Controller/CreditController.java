@@ -62,7 +62,7 @@ public class CreditController {
     //creo q esta mal esto
 
 
-    // para simular un crédito (esto lo deberian tener ambos users?)
+    // para simular un crédito
     @PostMapping("/simulate")
     public ResponseEntity<?> simulateCredit(@RequestBody CreditEntity credit) {
         // Validación simple

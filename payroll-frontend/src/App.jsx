@@ -13,6 +13,8 @@ import AnualReport from './components/AnualReport';
 import Profile from './components/Profile';
 import Login from './components/Login';
 import Register from './components/Register';
+import SimulateCredit from './components/SimulateCredit';
+import CreditRequest from './components/CreditRequest';
 //import { Login } from '@mui/icons-material';
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
             <Routes>
               <Route path="/home" element={<Home/>} />
               <Route path="/profile" element={<Profile/>} />
+              <Route path="/simulateCredit" element={<SimulateCredit/>} />
+              <Route path="/creditRequest" element={<CreditRequest/>} />
               <Route path="/login" element={<Login/>} />
               <Route path="/register" element={<Register/>} />
               <Route path="/employee/list" element={<EmployeeList/>} />

@@ -45,7 +45,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
         {isLoggedIn && isEjecutive && (
           <>
             {/* Opciones visibles solo para ejecutivos */}
-            <ListItemButton onClick={() => navigate("/employee/list")}>
+            <ListItemButton onClick={() => navigate("/simulateCredit")}>
               <ListItemIcon>
                 <RequestQuoteIcon />
               </ListItemIcon>
@@ -66,7 +66,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
         {isLoggedIn && !isEjecutive &&(
           <>
             {/* Opciones visibles para cualquier usuario autenticado */}
-            <ListItemButton onClick={() => navigate("/employee/discounts")}>
+            <ListItemButton onClick={() => navigate("/simulateCredit")}>
               <ListItemIcon>
                 <RequestQuoteIcon />
               </ListItemIcon>
@@ -92,7 +92,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
         {!isLoggedIn && (
           <>
             {/* Opciones visibles para usuarios no autenticados */}
-            <ListItemButton onClick={() => navigate("/login")}>
+            <ListItemButton onClick={() => navigate("/simulateCredit")}>
               <ListItemIcon>
                 <LoginIcon />
               </ListItemIcon>
