@@ -40,13 +40,20 @@ const CreditRequestDetail = () => {
 
   const handleDownload = async (documentId) => {
     try {
-        const response = await DocumentService.downloadDocument(documentId);
+        // Llamar al servicio para descargar el documento
+        const response = await DocumentService.downloadDocument(documentId, { responseType: 'blob' }); // Asegúrate de especificar que esperas un blob
         
         // Crear un enlace para descargar el archivo
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
+
+        // Asegúrate de usar el nombre del archivo correcto, incluyendo la extensión
+        const fileName = response.headers['content-disposition'] 
+            ? response.headers['content-disposition'].match(/filename="(.+)"/)[1] 
+            : `document_${documentId}.pdf`; // Valor por defecto si no se encuentra el nombre en la cabecera
+
         link.href = url;
-        link.setAttribute('download', `document_${documentId}`); // Puedes personalizar el nombre del archivo
+        link.setAttribute('download', fileName); // Asigna el nombre del archivo con la extensión
         document.body.appendChild(link);
         link.click();
         link.remove();

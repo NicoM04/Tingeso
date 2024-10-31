@@ -7,6 +7,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,33 +84,40 @@ public class DocumentController {
             DocumentEntity document = documentService.getDocumentById(documentId);
 
             if (document == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(null); // Documento no encontrado
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Documento no encontrado
             }
 
             Path filePath = Paths.get(document.getFilePath());
-            System.out.println("Intentando acceder a: " + filePath);
-
             Resource resource = new UrlResource(filePath.toUri());
 
             // 2. Comprobar si el recurso existe
             if (!resource.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(null); // Archivo no encontrado
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Archivo no encontrado
             }
 
-            // 3. Devolver el archivo con los encabezados correctos para descargar
+            // 3. Determinar el tipo MIME del archivo
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream"; // Tipo por defecto si no se puede determinar
+            }
+
+            // 4. Obtener el nombre del archivo con la extensión
+            String fileName = document.getFileName(); // Asegúrate de que esto tenga la extensión correcta
+
+            // 5. Devolver el archivo con los encabezados correctos para descargar
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getFileName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .contentType(MediaType.parseMediaType(contentType)) // Usar el tipo MIME correcto
                     .body(resource);
 
         } catch (IOException e) {
             // Log el error para depuración
             e.printStackTrace(); // Agrega un logger en producción
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
 
 
 
