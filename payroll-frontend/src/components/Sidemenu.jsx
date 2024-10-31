@@ -52,7 +52,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
               <ListItemText primary="Simular Crédito" />
             </ListItemButton>
 
-            <ListItemButton onClick={() => navigate("/extraHours/list")}>
+            <ListItemButton onClick={() => navigate("/creditRequestTable ")}>
               <ListItemIcon>
                 <AssignmentTurnedInIcon />
               </ListItemIcon>
@@ -73,7 +73,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
               <ListItemText primary="Simular Crédito" />
             </ListItemButton>
 
-            <ListItemButton onClick={() => navigate("/paycheck/vacations")}>
+            <ListItemButton onClick={() => navigate("/home")}>
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>

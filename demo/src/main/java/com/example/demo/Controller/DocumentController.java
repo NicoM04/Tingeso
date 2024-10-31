@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +25,7 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
-    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso\\files\\";
+    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso\\";
 
     /**
      * Endpoint para subir un archivo.
@@ -80,13 +81,21 @@ public class DocumentController {
         try {
             // 1. Recuperar el documento de la base de datos
             DocumentEntity document = documentService.getDocumentById(documentId);
-            Path filePath = Paths.get(document.getFilePath());
 
-            // 2. Cargar el archivo como recurso
+            if (document == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null); // Documento no encontrado
+            }
+
+            Path filePath = Paths.get(document.getFilePath());
+            System.out.println("Intentando acceder a: " + filePath);
+
             Resource resource = new UrlResource(filePath.toUri());
 
+            // 2. Comprobar si el recurso existe
             if (!resource.exists()) {
-                throw new IOException("Archivo no encontrado: " + filePath);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null); // Archivo no encontrado
             }
 
             // 3. Devolver el archivo con los encabezados correctos para descargar
@@ -95,15 +104,34 @@ public class DocumentController {
                     .body(resource);
 
         } catch (IOException e) {
-            return ResponseEntity.status(500).body(null);
+            // Log el error para depuración
+            e.printStackTrace(); // Agrega un logger en producción
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
+
 
 
     // Endpoint para obtener todos los documentos
     @GetMapping("/all")
     public ResponseEntity<List<DocumentEntity>> getAllDocuments() {
         List<DocumentEntity> documents = documentService.getAllDocuments();
+        return ResponseEntity.ok(documents);
+    }
+    /**
+     * Endpoint para obtener documentos por el ID del crédito.
+     * @param creditId ID del crédito asociado.
+     * @return Lista de documentos asociados al crédito.
+     */
+    @GetMapping("/byCredit/{creditId}")
+    public ResponseEntity<List<DocumentEntity>> getDocumentsByCreditId(@PathVariable Long creditId) {
+        List<DocumentEntity> documents = documentService.getDocumentsByCreditId(creditId);
+
+        if (documents.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Devuelve 204 No Content si no se encuentran documentos
+        }
+
         return ResponseEntity.ok(documents);
     }
 }

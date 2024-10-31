@@ -29,8 +29,13 @@ const getAllDocuments = () => {
     return httpClient.get("/api/documents/all");
 };
 
+const getDocumentsByCreditId = (creditId) => {
+    return httpClient.get(`/api/documents/byCredit/${creditId}`);
+};
+
 export default {
     uploadDocuments,
     downloadDocument,
-    getAllDocuments
+    getAllDocuments,
+    getDocumentsByCreditId
 };
