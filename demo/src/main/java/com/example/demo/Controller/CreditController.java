@@ -160,13 +160,13 @@ public class CreditController {
     /**
      * Endpoint para verificar si el préstamo puede finalizar antes de los 75 años (R6)
      * @param applicantAge Edad actual del solicitante
-     * @param loanTerm Plazo del préstamo en años
+     * @param credit Plazo del préstamo en años
      * @return true si puede finalizar antes de los 75 años, false si no
      */
     @GetMapping("/check-applicant-age")
     public ResponseEntity<Boolean> checkApplicantAge(@RequestParam int applicantAge,
-                                                     @RequestParam int loanTerm) {
-        boolean result = creditService.checkApplicantAge(applicantAge, loanTerm);
+                                                     @RequestBody CreditEntity credit) {
+        boolean result = creditService.checkApplicantAge(applicantAge, credit);
         return ResponseEntity.ok(result);
     }
 

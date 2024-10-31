@@ -55,24 +55,33 @@ const CreditRequestDetail = () => {
 
   const handleDownload = async (documentId) => {
     try {
-      const response = await DocumentService.downloadDocument(documentId);
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `document_${documentId}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      
-      window.URL.revokeObjectURL(url);
-      
-      alert('Documento descargado exitosamente.');
+        // Llamar al servicio para descargar el documento
+        const response = await DocumentService.downloadDocument(documentId, { responseType: 'blob' }); // Asegúrate de especificar que esperas un blob
+        
+        // Crear un enlace para descargar el archivo
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+
+        // Asegúrate de usar el nombre del archivo correcto, incluyendo la extensión
+        const fileName = response.headers['content-disposition'] 
+            ? response.headers['content-disposition'].match(/filename="(.+)"/)[1] 
+            : `document_${documentId}.pdf`; // Valor por defecto si no se encuentra el nombre en la cabecera
+
+        link.href = url;
+        link.setAttribute('download', fileName); // Asigna el nombre del archivo con la extensión
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        // Opcional: liberar el objeto URL
+        window.URL.revokeObjectURL(url);
+        
+        alert('Documento descargado exitosamente.');
     } catch (error) {
-      console.error('Error al descargar el documento:', error);
-      alert('Hubo un error al descargar el documento.');
+        console.error('Error al descargar el documento:', error);
+        alert('Hubo un error al descargar el documento.');
     }
-  };
+};
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -99,7 +108,7 @@ const CreditRequestDetail = () => {
         // Estabilidad laboral
         result = await CreditService.checkEmploymentStability(
           ruleInputs.employmentYears,
-          ruleInputs.isSelfEmployed,
+          false,
           ruleInputs.incomeYears
         );
         alert(`R3 cumplida: ${result.data}`);
@@ -116,12 +125,21 @@ const CreditRequestDetail = () => {
         break;
       case 6:
         // Edad del solicitante
-        result = await CreditService.checkApplicantAge(ruleInputs.applicantAge, credit.term);
+        result = await CreditService.checkApplicantAge(ruleInputs.applicantAge, credit);
         alert(`R6 cumplida: ${result.data}`);
         break;
       default:
         break;
     }
+  };
+
+  // Mapa de etiquetas para cada regla
+  const ruleInputLabels = {
+    1: "Ingresos Mensuales",
+    3: "Años de Antigüedad Laboral",
+    4: "Total de Deuda",
+    5: "Valor de Propiedad",
+    6: "Edad del Solicitante",
   };
 
   return (
@@ -206,8 +224,12 @@ const CreditRequestDetail = () => {
                     {rule.requiresInput && (
                       <div style={{ marginLeft: '20px' }}>
                         <TextField
-                          name="monthlyIncome"
-                          label="Ingresos Mensuales"
+                          name={rule.id === 1 ? "monthlyIncome" : 
+                                rule.id === 3 ? "employmentYears" : 
+                                rule.id === 4 ? "totalDebt" : 
+                                rule.id === 5 ? "propertyValue" : 
+                                rule.id === 6 ? "applicantAge" : ""}
+                          label={ruleInputLabels[rule.id] || "Ingrese valor"}
                           type="number"
                           onChange={handleInputChange}
                           style={{ marginRight: '10px' }}

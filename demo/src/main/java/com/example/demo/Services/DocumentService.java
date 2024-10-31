@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class DocumentService {
 
-    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso\\files";
+    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso";
 
     @Autowired
     private DocumentRepository documentRepository;
@@ -29,18 +29,18 @@ public class DocumentService {
      * @return La entidad DocumentEntity guardada en la base de datos.
      */
     public DocumentEntity saveDocument(String fileName, Long creditId) throws IOException {
-        // Definir la ruta completa del archivo
-        Path filePath = Paths.get(UPLOAD_DIR + fileName);
-
+        // Definir la ruta completa del archivo, asegurándote de usar el separador adecuado
+        Path filePath = Paths.get(UPLOAD_DIR + "\\" + fileName);
         // Crear la entidad DocumentEntity
         DocumentEntity document = new DocumentEntity();
-        document.setFileName(fileName);
-        document.setFilePath(filePath.toString());
+        document.setFileName(fileName); // Aquí el nombre del archivo se guarda sin cambios
+        document.setFilePath(filePath.toString()); // Aquí se guarda la ruta correcta
         document.setCreditId(creditId);
 
         // Guardar la entidad en la base de datos
         return documentRepository.save(document);
     }
+
 
     /**
      * Recupera un documento por su ID.

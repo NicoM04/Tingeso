@@ -61,8 +61,15 @@ const checkCreditHistory = hasGoodCreditHistory => {
 
 // Verificar estabilidad laboral
 const checkEmploymentStability = (employmentYears, isSelfEmployed, incomeYears) => {
-    return httpClient.post(`/api/credit/check-employment-stability?employmentYears=${employmentYears}&isSelfEmployed=${isSelfEmployed}&incomeYears=${incomeYears}`);
-};
+    return axios.post(`/api/credit/check-employment-stability`, null, {
+      params: {
+        employmentYears: employmentYears,
+        isSelfEmployed: isSelfEmployed,
+        incomeYears: incomeYears,
+      },
+    });
+  };
+
 
 // Verificar relación deuda/ingreso
 const checkDebtToIncomeRatio = (data, totalDebt, monthlyIncome) => {

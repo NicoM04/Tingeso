@@ -246,11 +246,11 @@ public class CreditService {
      * Si al final del plazo está muy cerca de 75 años (a menos de 5 años), el préstamo se rechaza.
      *
      * @param applicantAge Edad actual del solicitante.
-     * @param loanTerm Años del plazo del préstamo.
+     * @param credit Años del plazo del préstamo.
      * @return true si el préstamo puede terminar antes de los 75 años, false si no.
      */
-    public boolean checkApplicantAge(int applicantAge, int loanTerm) {
-        int ageAtLoanEnd = applicantAge + loanTerm;
+    public boolean checkApplicantAge(int applicantAge, CreditEntity credit) {
+        int ageAtLoanEnd = applicantAge + credit.getDueDate();
         return ageAtLoanEnd <= 75 && ageAtLoanEnd >= 70;  // El solicitante debe tener margen antes de los 75 años
     }
 

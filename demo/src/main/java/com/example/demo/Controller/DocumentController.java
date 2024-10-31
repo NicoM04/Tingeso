@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +27,7 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
-    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso\\";
+    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso";
 
     /**
      * Endpoint para subir un archivo.
@@ -54,7 +55,11 @@ public class DocumentController {
                 String fileName = file.getOriginalFilename();
 
                 // Definir la ruta completa donde se almacenará el archivo
-                Path filePath = Paths.get(UPLOAD_DIR + fileName);
+                Path filePath = Paths.get(UPLOAD_DIR + "\\" + fileName);
+
+
+
+
 
                 // Guardar el archivo en la carpeta local
                 Files.copy(file.getInputStream(), filePath);
