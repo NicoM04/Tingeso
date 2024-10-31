@@ -33,6 +33,10 @@ public class CreditService {
     }
 
     public CreditEntity saveCredit(CreditEntity credit) {
+        // Calcular el pago mensual
+        double monthlyPayment = calculateMonthlyPayment(credit.getAmount(), credit.getInterestRate(), credit.getDueDate());
+        // Asignar el pago mensual calculado al crédito
+        credit.setMonthlyPayment(monthlyPayment);
         return creditRepository.save(credit);
     }
     public ArrayList<CreditEntity> getAllCredits() {
@@ -151,10 +155,10 @@ public class CreditService {
      * @return true si la relación está dentro del límite, false si es mayor a 35%.
      */
     public boolean checkIncomeToPaymentRatio(CreditEntity credit, double monthlyIncome) {
-        double monthlyPayment = credit.getMonthlyPayment();
-        double maxPayment = monthlyIncome * 0.35;  // 35% de los ingresos mensuales
+        double monthlyPayment = credit.getMonthlyPayment(); // Cuota mensual del préstamo
+        double ratio = (monthlyPayment / monthlyIncome) * 100; // Cálculo del porcentaje cuota/ingreso
 
-        return monthlyPayment <= maxPayment;
+        return ratio < 35; // True si el porcentaje es menor o igual a 35%
     }
 
     /**

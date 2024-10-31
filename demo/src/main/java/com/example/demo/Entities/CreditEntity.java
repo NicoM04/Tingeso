@@ -24,10 +24,4 @@ public class CreditEntity {
     private int state; // "Simulacion", "Solicitado", "Aprobado", "Rechazado", "Activo"
     private int idClient;
 
-    //private List<DocumentEntity> documents;  // Lista de documentos asociados al crédito
-
-
-
-
-
 }
