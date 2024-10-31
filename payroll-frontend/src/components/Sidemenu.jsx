@@ -80,7 +80,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
               <ListItemText primary="Mis Solicitudes" />
             </ListItemButton>
 
-            <ListItemButton onClick={() => navigate("/paycheck/medicalleave")}>
+            <ListItemButton onClick={() => navigate("/CreditRequest")}>
               <ListItemIcon>
                 <CreditScoreIcon />
               </ListItemIcon>
@@ -94,7 +94,7 @@ export default function Sidemenu({ open, toggleDrawer }) {
             {/* Opciones visibles para usuarios no autenticados */}
             <ListItemButton onClick={() => navigate("/simulateCredit")}>
               <ListItemIcon>
-                <LoginIcon />
+                <RequestQuoteIcon />
               </ListItemIcon>
               <ListItemText primary="Simular Crédito" />
             </ListItemButton>

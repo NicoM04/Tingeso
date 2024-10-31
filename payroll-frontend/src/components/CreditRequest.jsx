@@ -1,119 +1,57 @@
-import React, { useState } from 'react';
-import { 
-    Grid, 
-    Paper, 
-    Typography, 
-    Button, 
-    Box, 
-    FormControl, 
-    FormLabel, 
-    RadioGroup, 
-    FormControlLabel, 
-    Radio, 
-    Input 
-} from '@mui/material';
-import CreditService from '../services/credit.service'; // Asegúrate de que la ruta sea correcta
-import DocumentService from '../services/document.service'; // Asegúrate de que la ruta sea correcta
+import React, { useState, useEffect } from 'react';
+import { Grid, Paper, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import CreditService from '../services/credit.service';
+import { useNavigate } from 'react-router-dom';
 
 const creditTypes = [
-    { id: 1, name: "Primera Vivienda", maxTerm: 30, interestRate: "3.5%-5%", requiredDocuments: ["Comprobante de ingresos", "Certificado de avalúo", "Historial crediticio"] },
-    { id: 2, name: "Segunda Vivienda", maxTerm: 20, interestRate: "4%-6%", requiredDocuments: ["Comprobante de ingresos", "Certificado de avalúo", "Escritura de la primera vivienda", "Historial crediticio"] },
-    { id: 3, name: "Tercera Vivienda", maxTerm: 25, interestRate: "5%-7%", requiredDocuments: ["Estado financiero del negocio", "Comprobante de ingresos", "Certificado de avalúo", "Plan de negocios"] },
-    { id: 4, name: "Cuarta Vivienda", maxTerm: 15, interestRate: "4.5%-6%", requiredDocuments: ["Comprobante de ingresos", "Presupuesto de la remodelación", "Certificado de avalúo actualizado"] },
+    { id: 1, name: "Primera Vivienda", maxTerm: 30, interestRate: "3.5%-5%" },
+    { id: 2, name: "Segunda Vivienda", maxTerm: 20, interestRate: "4%-6%" },
+    { id: 3, name: "Tercera Vivienda", maxTerm: 25, interestRate: "5%-7%" },
+    { id: 4, name: "Cuarta Vivienda", maxTerm: 15, interestRate: "4.5%-6%" },
 ];
 
 const CreditRequest = () => {
-    const [selectedCreditType, setSelectedCreditType] = useState(null);
-    const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const [idClient, setUserId] = useState(null);
+
+    // Obtener el ID del usuario desde localStorage o un contexto de autenticación
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.id) {
+            setUserId(user.id);
+        } else {
+            // Redirigir o mostrar error si no hay usuario autenticado
+            setError("Debe iniciar sesión para solicitar un crédito.");
+        }
+    }, []);
 
     // Manejar la selección del tipo de crédito
-    const handleCreditTypeChange = (event) => {
+    const handleCreditTypeChange = async (event) => {
         const creditTypeId = parseInt(event.target.value);
-        setSelectedCreditType(creditTypes.find(type => type.id === creditTypeId));
-        setDocuments([]);  // Limpiar documentos anteriores
-        setError(null);
+        const selectedCreditType = creditTypes.find(type => type.id === creditTypeId);
 
-        console.log("Tipo de crédito seleccionado:", creditTypeId);
-    };
-
-    // Manejar la carga de archivos
-    const handleFileChange = (event, index) => {
-        const newDocuments = [...documents];
-        newDocuments[index] = event.target.files[0];
-        setDocuments(newDocuments);
-
-        console.log(`Documento ${index + 1} seleccionado:`, event.target.files[0].name);
-    };
-
-    // Manejar el envío del formulario
-    const handleSubmit = async () => {
-        console.log("Enviando la solicitud de crédito...");
-
-        if (!selectedCreditType || documents.length !== selectedCreditType.requiredDocuments.length) {
-            setError(`Debe subir todos los documentos requeridos (${selectedCreditType.requiredDocuments.length} documentos).`);
-            console.log("Error: No se subieron todos los documentos requeridos.");
-            return;
-        }
-
-        const formData = new FormData();
-        documents.forEach((doc) => {
-            formData.append('file', doc);
-        });
-
-        // Logs para ver los datos enviados
-        console.log('Tipo de crédito seleccionado:', selectedCreditType);
-        console.log('Documentos cargados:', documents);
+        const creditRequest = {
+            typeLoan: selectedCreditType.id,
+            amount: 100000, // Puedes personalizar este valor
+            interestRate: Math.max(...selectedCreditType.interestRate.split('%')[0].split('-').map(parseFloat)),
+            dueDate: selectedCreditType.maxTerm,
+            idClient: idClient, // Asignar el ID del usuario autenticado
+        };
 
         try {
             setLoading(true);
             setError(null);
-
-            // Crear el objeto de solicitud de crédito
-            const creditRequest = {
-                typeLoan: selectedCreditType.id,
-                amount: 100000, // Ejemplo de monto, puedes cambiarlo
-                interestRate: Math.max(...selectedCreditType.interestRate.split('%')[0].split('-').map(parseFloat)),
-                term: selectedCreditType.maxTerm,
-            };
-
-            // Logs antes de enviar la solicitud del crédito
-            console.log('Solicitud de crédito a guardar:', creditRequest);
-
-            // Hacer una petición POST para guardar el crédito
+            // Guardar el crédito en el backend
             const saveResponse = await CreditService.create(creditRequest);
             const savedCreditId = saveResponse.data.id;
-
-            // Log del ID del crédito guardado
+            const savedCreditIduser = saveResponse.data.idClient;
             console.log('Crédito guardado con ID:', savedCreditId);
+            console.log('Crédito guardado con ID usre:', savedCreditIduser);
 
-            // Subir los documentos asociados al crédito
-            formData.append('creditId', savedCreditId);
-
-            // Logs antes de enviar los documentos
-            console.log('Subiendo archivos con creditId:', savedCreditId);
-
-            const documentResponse = await DocumentService.uploadDocument(formData, savedCreditId);
-
-            // Log de respuesta del servidor al subir documentos
-            console.log('Respuesta al subir documentos:', documentResponse.data);
-
-            // Finalmente, crear el crédito después de guardar y subir documentos
-            const createCreditRequest = {
-                ...creditRequest,
-                id: savedCreditId,
-            };
-
-            // Log antes de crear el crédito final
-            console.log('Creando crédito final:', createCreditRequest);
-
-            const createCreditResponse = await CreditService.createCreditWithDocuments(createCreditRequest, documents);
-
-            // Log de la respuesta al crear el crédito
-            console.log('Respuesta al crear crédito:', createCreditResponse.data);
-
-            alert("Crédito creado correctamente y documentos subidos.");
+            // Redirigir a la página de carga de documentos con el ID del crédito
+            navigate(`/upload-documents/${savedCreditId}`);
         } catch (err) {
             setError("Error al crear la solicitud de crédito: " + err.message);
             console.error('Error en la solicitud de crédito:', err);
@@ -121,6 +59,14 @@ const CreditRequest = () => {
             setLoading(false);
         }
     };
+
+    if (!idClient) {
+        return (
+            <Typography color="error" align="center" mt={2}>
+                {error}
+            </Typography>
+        );
+    }
 
     return (
         <Grid container justifyContent="center" alignItems="center" style={{ minHeight: '100vh' }}>
@@ -144,38 +90,16 @@ const CreditRequest = () => {
                         </RadioGroup>
                     </FormControl>
 
-                    {selectedCreditType && (
-                        <Box mt={3}>
-                            <Typography variant="h6">Documentos requeridos:</Typography>
-                            {selectedCreditType.requiredDocuments.map((doc, index) => (
-                                <Box key={index} mt={2}>
-                                    <Typography>{doc}:</Typography>
-                                    <Input
-                                        type="file"
-                                        onChange={(event) => handleFileChange(event, index)}
-                                        fullWidth
-                                        required
-                                    />
-                                </Box>
-                            ))}
+                    {error && (
+                        <Typography color="error" mt={2}>
+                            {error}
+                        </Typography>
+                    )}
 
-                            {error && (
-                                <Typography color="error" mt={2}>
-                                    {error}
-                                </Typography>
-                            )}
-
-                            <Box mt={4} textAlign="center">
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleSubmit}
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Enviando...' : 'Enviar Solicitud'}
-                                </Button>
-                            </Box>
-                        </Box>
+                    {loading && (
+                        <Typography mt={2}>
+                            Creando solicitud de crédito...
+                        </Typography>
                     )}
                 </Paper>
             </Grid>

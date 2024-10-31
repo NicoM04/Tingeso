@@ -8,11 +8,12 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Sidemenu from "./Sidemenu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Importa useNavigate
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null); // Estado para almacenar el usuario
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const toggleDrawer = (open) => (event) => {
     setOpen(open);
@@ -21,6 +22,7 @@ export default function Navbar() {
   const handleLogout = () => {
     setUser(null); // Elimina el usuario del estado
     localStorage.removeItem("user"); // Elimina de localStorage
+    navigate("/home"); // Redirige a /home después de cerrar sesión
   };
 
   useEffect(() => {

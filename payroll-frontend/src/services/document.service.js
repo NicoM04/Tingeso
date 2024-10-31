@@ -1,9 +1,11 @@
 import httpClient from "../http-common";
 
-// Subir un archivo
-const uploadDocument = (file, creditId) => {
+// Subir múltiples archivos
+const uploadDocuments = (files, creditId) => {
     const formData = new FormData();
-    formData.append("file", file);
+    files.forEach(file => {
+        formData.append("files", file); // 'files' para manejar múltiples archivos
+    });
     if (creditId) {
         formData.append("creditId", creditId);
     }
@@ -13,6 +15,7 @@ const uploadDocument = (file, creditId) => {
         },
     });
 };
+
 
 // Descargar un archivo por su ID
 const downloadDocument = documentId => {
@@ -27,7 +30,7 @@ const getAllDocuments = () => {
 };
 
 export default {
-    uploadDocument,
+    uploadDocuments,
     downloadDocument,
     getAllDocuments
 };

@@ -15,6 +15,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import SimulateCredit from './components/SimulateCredit';
 import CreditRequest from './components/CreditRequest';
+import DocumentUpload from './components/DocumentUpload';
 //import { Login } from '@mui/icons-material';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
               <Route path="/profile" element={<Profile/>} />
               <Route path="/simulateCredit" element={<SimulateCredit/>} />
               <Route path="/creditRequest" element={<CreditRequest/>} />
+              <Route path="/upload-documents/:creditId" element={<DocumentUpload />} />
               <Route path="/login" element={<Login/>} />
               <Route path="/register" element={<Register/>} />
               <Route path="/employee/list" element={<EmployeeList/>} />

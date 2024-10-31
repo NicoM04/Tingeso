@@ -28,38 +28,47 @@ public class DocumentController {
 
     /**
      * Endpoint para subir un archivo.
-     * @param file Archivo subido por el cliente.
+     * @param files Archivo subido por el cliente.
      * @param creditId ID del crédito asociado (opcional).
      * @return Mensaje de éxito o error.
      */
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadDocument(@RequestParam("file") MultipartFile file,
-                                                 @RequestParam(value = "creditId", required = false) Long creditId) {
+    public ResponseEntity<String> uploadDocuments(@RequestParam("files") MultipartFile[] files,
+                                                  @RequestParam(value = "creditId", required = false) Long creditId) {
+        StringBuilder responseMessage = new StringBuilder();
         try {
-            // 1. Verificar que el archivo no esté vacío
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("Archivo vacío.");
+            // Verificar que al menos un archivo no esté vacío
+            if (files.length == 0) {
+                return ResponseEntity.badRequest().body("No se han subido archivos.");
             }
 
-            // 2. Obtener el nombre del archivo
-            String fileName = file.getOriginalFilename();
+            for (MultipartFile file : files) {
+                // Verificar que cada archivo no esté vacío
+                if (file.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Uno o más archivos están vacíos.");
+                }
 
-            // 3. Definir la ruta completa donde se almacenará el archivo
-            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+                // Obtener el nombre del archivo
+                String fileName = file.getOriginalFilename();
 
-            // 4. Guardar el archivo en la carpeta local
-            Files.copy(file.getInputStream(), filePath);
+                // Definir la ruta completa donde se almacenará el archivo
+                Path filePath = Paths.get(UPLOAD_DIR + fileName);
 
-            // 5. Guardar la ruta del archivo y la información del crédito en la base de datos
-            documentService.saveDocument(fileName, creditId);
+                // Guardar el archivo en la carpeta local
+                Files.copy(file.getInputStream(), filePath);
 
-            // 6. Retornar mensaje de éxito
-            return ResponseEntity.ok("Archivo subido correctamente: " + filePath.toString());
+                // Guardar la ruta del archivo y la información del crédito en la base de datos
+                documentService.saveDocument(fileName, creditId);
+                responseMessage.append("Archivo subido correctamente: ").append(filePath.toString()).append("\n");
+            }
+
+            return ResponseEntity.ok(responseMessage.toString());
 
         } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error al subir el archivo: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al subir los archivos: " + e.getMessage());
         }
     }
+
 
     /**
      * Endpoint para descargar un archivo.
