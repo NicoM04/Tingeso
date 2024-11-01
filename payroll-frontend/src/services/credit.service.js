@@ -59,16 +59,12 @@ const checkCreditHistory = hasGoodCreditHistory => {
     return httpClient.get(`/api/credit/check-credit-history?hasGoodCreditHistory=${hasGoodCreditHistory}`);
 };
 
-// Verificar estabilidad laboral
+
+
+// Verificar estabilidad laboral (R3)
 const checkEmploymentStability = (employmentYears, isSelfEmployed, incomeYears) => {
-    return axios.post(`/api/credit/check-employment-stability`, null, {
-      params: {
-        employmentYears: employmentYears,
-        isSelfEmployed: isSelfEmployed,
-        incomeYears: incomeYears,
-      },
-    });
-  };
+    return httpClient.post(`/api/credit/check-employment-stability?employmentYears=${employmentYears}&isSelfEmployed=${isSelfEmployed}&incomeYears=${incomeYears}`);
+};
 
 
 // Verificar relación deuda/ingreso
@@ -81,10 +77,12 @@ const checkMaximumLoanAmount = (data, propertyValue) => {
     return httpClient.post(`/api/credit/check-maximum-loan-amount?propertyValue=${propertyValue}`, data);
 };
 
+
 // Verificar si el préstamo puede finalizar antes de los 75 años
-const checkApplicantAge = (applicantAge, loanTerm) => {
-    return httpClient.get(`/api/credit/check-applicant-age?applicantAge=${applicantAge}&loanTerm=${loanTerm}`);
+const checkApplicantAge = (applicantAge, credit) => {
+    return httpClient.post(`/api/credit/check-applicant-age?applicantAge=${applicantAge}`, credit);
 };
+
 
 export default {
     getAll,

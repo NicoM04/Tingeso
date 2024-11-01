@@ -23,7 +23,15 @@ const CreditRequestDetail = () => {
   const [credit, setCredit] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [rules, setRules] = useState([]); // Nuevo estado para las reglas
-  const [ruleInputs, setRuleInputs] = useState({}); // Para almacenar entradas de usuario
+  const [ruleInputs, setRuleInputs] = useState({
+    employmentYears: 0,
+    isSelfEmployed: false,
+    incomeYears: 0,
+    totalDebt: 0,
+    monthlyIncome: 0,
+    applicantAge:0,
+
+  }); // Para almacenar entradas de usuario
 
   useEffect(() => {
     const fetchCreditDetails = async () => {
@@ -83,12 +91,12 @@ const CreditRequestDetail = () => {
     }
 };
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setRuleInputs({
-      ...ruleInputs,
-      [name]: value,
-    });
+const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setRuleInputs((prevInputs) => ({
+      ...prevInputs,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const checkRule = async (rule) => {
@@ -104,30 +112,47 @@ const CreditRequestDetail = () => {
         result = await CreditService.checkCreditHistory(ruleInputs.hasGoodCreditHistory);
         alert(`R2 cumplida: ${result.data}`);
         break;
-      case 3:
-        // Estabilidad laboral
-        result = await CreditService.checkEmploymentStability(
-          ruleInputs.employmentYears,
-          false,
-          ruleInputs.incomeYears
-        );
-        alert(`R3 cumplida: ${result.data}`);
-        break;
-      case 4:
-        // Relación deuda/ingreso
-        result = await CreditService.checkDebtToIncomeRatio(credit, ruleInputs.totalDebt, ruleInputs.monthlyIncome);
-        alert(`R4 cumplida: ${result.data}`);
-        break;
+        case 3:
+          // Estabilidad laboral (R3)
+          const incomeYears = ruleInputs.isSelfEmployed ? ruleInputs.incomeYears : 0;
+
+          result = await CreditService.checkEmploymentStability(
+            ruleInputs.employmentYears,
+            ruleInputs.isSelfEmployed,
+            incomeYears
+          );
+
+          alert(`R3 cumplida: ${result.data}`);
+          break;
+          
+        case 4:
+          // Imprimir en consola los valores enviados al backend para R4
+          console.log('Datos enviados para R4 - Relación Deuda/Ingreso:', {
+            totalDebt: ruleInputs.totalDebt,
+            monthlyIncome: ruleInputs.monthlyIncome,
+          });
+
+          // Lógica para la regla 4 (R4): Relación Deuda/Ingreso
+          result = await CreditService.checkDebtToIncomeRatio(
+            credit, // Enviar un objeto vacío como credit para que el backend lo maneje
+            ruleInputs.totalDebt,
+            ruleInputs.monthlyIncome
+          );
+          alert(`R4 cumplida: ${result.data}`);
+          break;
       case 5:
         // Monto máximo financiable
         result = await CreditService.checkMaximumLoanAmount(credit, ruleInputs.propertyValue);
         alert(`R5 cumplida: ${result.data}`);
         break;
-      case 6:
-        // Edad del solicitante
-        result = await CreditService.checkApplicantAge(ruleInputs.applicantAge, credit);
-        alert(`R6 cumplida: ${result.data}`);
-        break;
+        case 6:
+            // Edad del solicitante
+            result = await CreditService.checkApplicantAge(ruleInputs.applicantAge, credit);
+            alert(`R6 cumplida: ${result.data}`);
+            break;
+        
+        
+
       default:
         break;
     }

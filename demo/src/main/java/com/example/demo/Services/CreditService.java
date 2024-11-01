@@ -217,7 +217,7 @@ public class CreditService {
      * @return true si el financiamiento está dentro de los límites, false si es mayor al permitido.
      */
     public boolean checkMaximumLoanAmount(CreditEntity credit, double propertyValue) {
-        double maxLoanPercentage = 0.0;
+        double maxLoanPercentage;
 
         // Determinar el porcentaje máximo financiable según el tipo de préstamo
         switch (credit.getTypeLoan()) {
@@ -226,16 +226,23 @@ public class CreditService {
                 break;
             case 2:  // Segunda vivienda
                 maxLoanPercentage = 0.70;
+                break;
             case 3:  // Propiedades comerciales
                 maxLoanPercentage = 0.60;
-            case 4:  // Propiedades comerciales
+                break;
+            case 4:  // Propiedades comerciales (parece un duplicado, ¿es correcto?)
                 maxLoanPercentage = 0.50;
                 break;
             default:
-                throw new IllegalArgumentException("Tipo de préstamo no válido.");
+                throw new IllegalArgumentException("Tipo de préstamo no válido: " + credit.getTypeLoan());
         }
 
         double maxFinanciamiento = propertyValue * maxLoanPercentage;
+
+        // Validar que el monto del crédito no sea negativo
+        if (credit.getAmount() < 0) {
+            throw new IllegalArgumentException("El monto del crédito no puede ser negativo.");
+        }
 
         return credit.getAmount() <= maxFinanciamiento;  // El monto solicitado debe estar dentro del límite
     }
@@ -251,7 +258,7 @@ public class CreditService {
      */
     public boolean checkApplicantAge(int applicantAge, CreditEntity credit) {
         int ageAtLoanEnd = applicantAge + credit.getDueDate();
-        return ageAtLoanEnd <= 75 && ageAtLoanEnd >= 70;  // El solicitante debe tener margen antes de los 75 años
+        return ageAtLoanEnd <= 75 ;  // El solicitante debe tener margen antes de los 75 años
     }
 
 
