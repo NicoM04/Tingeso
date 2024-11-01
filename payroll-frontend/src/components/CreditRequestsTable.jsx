@@ -42,7 +42,7 @@ const CreditRequestsTable = () => {
             <TableRow key={credit.id}>
               <TableCell>{credit.idClient}</TableCell>
               <TableCell>{credit.typeLoan}</TableCell>
-              <TableCell>{credit.status}</TableCell>
+              <TableCell>{credit.state}</TableCell>
               <TableCell>
                 <Button onClick={() => handleViewDetails(credit.id)} variant="contained" color="primary">
                   Ver Detalles

@@ -54,10 +54,11 @@ const checkIncomeToPaymentRatio = (data, monthlyIncome) => {
     return httpClient.post(`/api/credit/check-income-to-payment-ratio?monthlyIncome=${monthlyIncome}`, data);
 };
 
-// Verificar historial crediticio
-const checkCreditHistory = hasGoodCreditHistory => {
-    return httpClient.get(`/api/credit/check-credit-history?hasGoodCreditHistory=${hasGoodCreditHistory}`);
+const checkCreditHistory = (hasGoodCreditHistory) => {
+    return httpClient.post(`/api/credit/check-credit-history?hasGoodCreditHistory=${hasGoodCreditHistory}`);
 };
+
+
 
 
 
@@ -83,7 +84,15 @@ const checkApplicantAge = (applicantAge, credit) => {
     return httpClient.post(`/api/credit/check-applicant-age?applicantAge=${applicantAge}`, credit);
 };
 
+// Verificar la capacidad de ahorro (R7)
+const checkSavingsCapacity = (hasMinimumBalance, hasConsistentSavings, hasRegularDeposits, meetsBalanceYears, hasNoRecentWithdrawals) => {
+    return httpClient.post(`/api/credit/evaluate-savings-capacity?hasMinimumBalance=${hasMinimumBalance}&hasConsistentSavings=${hasConsistentSavings}&hasRegularDeposits=${hasRegularDeposits}&meetsBalanceYears=${meetsBalanceYears}&hasNoRecentWithdrawals=${hasNoRecentWithdrawals}`);
+};
 
+// Obtener el usuario por ID del crédito
+const getUserByCreditId = (creditId) => {
+    return httpClient.get(`/api/credit/${creditId}/user`);
+};
 export default {
     getAll,
     get,
@@ -98,5 +107,7 @@ export default {
     checkEmploymentStability,
     checkDebtToIncomeRatio,
     checkMaximumLoanAmount,
-    checkApplicantAge
+    checkApplicantAge,
+    checkSavingsCapacity,
+    getUserByCreditId
 };

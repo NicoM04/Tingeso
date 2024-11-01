@@ -169,8 +169,17 @@ public class CreditService {
      * @return true si el historial es bueno, false si tiene morosidades graves o muchas deudas.
      */
     public boolean checkCreditHistory(boolean hasGoodCreditHistory) {
-        return hasGoodCreditHistory;
+        // Aquí se podría extender la lógica para incluir consultas adicionales,
+        // como revisar una base de datos o implementar reglas adicionales para evaluar el historial.
+        if (!hasGoodCreditHistory) {
+            // Si el cliente no tiene un buen historial, retorna false
+            return false;
+        }
+
+        // Retorna true si el historial es bueno
+        return true;
     }
+
 
     /**
      * R3: Antigüedad Laboral y Estabilidad.
@@ -263,52 +272,29 @@ public class CreditService {
 
 
 
-    /*
 
-     * R7: Capacidad de Ahorro (Reglas R71 a R75).
-     * El cliente debe cumplir con diversas condiciones relacionadas con su cuenta de ahorros.
-     *
-     * @param savingsAccount El estado de cuenta de ahorros del cliente.
-     * @param requestedLoanAmount El monto del préstamo solicitado.
-     * @return true si todas las condiciones de ahorro se cumplen, false si alguna es negativa.
+    public String evaluateSavingsCapacity(boolean hasMinimumBalance, boolean hasConsistentSavings,
+                                          boolean hasRegularDeposits, boolean meetsBalanceYears,
+                                          boolean hasNoRecentWithdrawals) {
+        int criteriaMet = 0;
 
-    public boolean checkSavingsCapacity(int balance, savingsAccount, double requestedLoanAmount) {
-        boolean passed = true;
+        // Evaluar subreglas
+        if (hasMinimumBalance) criteriaMet++;
+        if (hasConsistentSavings) criteriaMet++;
+        if (hasRegularDeposits) criteriaMet++;
+        if (meetsBalanceYears) criteriaMet++;
+        if (hasNoRecentWithdrawals) criteriaMet++;
 
-        // R71: Saldo mínimo requerido (al menos 10% del monto del préstamo)
-        if ( balance < requestedLoanAmount * 0.10) {
-            passed = false;
-        }
-
-        // R72: Historial de ahorro consistente (últimos 12 meses)
-        if (savingsAccount.hasSignificantWithdrawals(12)) {  // Retiros mayores al 50% del saldo
-            passed = false;
-        }
-
-        // R73: Depósitos periódicos (al menos 5% de los ingresos mensuales)
-        if (!savingsAccount.hasRegularDeposits(5)) {
-            passed = false;
-        }
-
-        // R74: Relación saldo/años de antigüedad
-        if (savingsAccount.getAccountAgeYears() < 2) {
-            if (savingsAccount.getBalance() < requestedLoanAmount * 0.20) {
-                passed = false;
-            }
+        // Evaluación final
+        if (criteriaMet >= 5) {
+            return "Sólida"; // Aprobación
+        } else if (criteriaMet >= 3) {
+            return "Moderada"; // Revisión adicional
         } else {
-            if (savingsAccount.getBalance() < requestedLoanAmount * 0.10) {
-                passed = false;
-            }
+            return "Insuficiente"; // Rechazo
         }
-
-        // R75: Retiros recientes (más del 30% en los últimos 6 meses)
-        if (savingsAccount.hasRecentWithdrawals(6, 0.30)) {
-            passed = false;
-        }
-
-        return passed;
     }
-    */
+
 
 
 

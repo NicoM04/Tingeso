@@ -1,7 +1,9 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entities.CreditEntity;
+import com.example.demo.Entities.UserEntity;
 import com.example.demo.Services.CreditService;
+import com.example.demo.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +17,8 @@ import java.util.List;
 public class CreditController {
     @Autowired
     CreditService creditService;
-
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/")
     public ResponseEntity<List<CreditEntity>> getAllCredits() {
@@ -89,6 +92,18 @@ public class CreditController {
         }
     }
 
+    @GetMapping("/{id}/user")
+    public ResponseEntity<UserEntity> getUserByCreditId(@PathVariable Long id) {
+        CreditEntity credit = creditService.getCreditById(id); // Busca el crédito por ID
+        if (credit == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Long userId = credit.getIdClient(); // Obtén el ID del cliente desde el objeto de crédito
+        UserEntity user = userService.getUserById(userId); // Busca el cliente por su ID
+
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
 
     /**
      * Endpoint para verificar la relación cuota/ingreso (R1)
@@ -108,11 +123,13 @@ public class CreditController {
      * @param hasGoodCreditHistory Indica si el cliente tiene un buen historial crediticio
      * @return true si el historial es bueno, false si no
      */
-    @GetMapping("/check-credit-history")
+    @PostMapping("/check-credit-history")
     public ResponseEntity<Boolean> checkCreditHistory(@RequestParam boolean hasGoodCreditHistory) {
         boolean result = creditService.checkCreditHistory(hasGoodCreditHistory);
         return ResponseEntity.ok(result);
     }
+
+
 
     /**
      * Endpoint para verificar la estabilidad laboral del solicitante (R3)
@@ -170,18 +187,23 @@ public class CreditController {
         return ResponseEntity.ok(result);
     }
 
-    /*
-     * Endpoint para verificar la capacidad de ahorro (R7)
-     * @param savingsAccount Información de la cuenta de ahorros del cliente
-     * @param requestedLoanAmount Monto del préstamo solicitado
-     * @return true si cumple con las reglas de ahorro, false si no
+    @PostMapping("/evaluate-savings-capacity")
+    public ResponseEntity<String> evaluateSavingsCapacity(
+            @RequestParam boolean hasMinimumBalance,
+            @RequestParam boolean hasConsistentSavings,
+            @RequestParam boolean hasRegularDeposits,
+            @RequestParam boolean meetsBalanceYears,
+            @RequestParam boolean hasNoRecentWithdrawals) {
 
-    @PostMapping("/check-savings-capacity")
-    public ResponseEntity<Boolean> checkSavingsCapacity(@RequestBody SavingsAccount savingsAccount,
-                                                        @RequestParam double requestedLoanAmount) {
-        boolean result = creditService.checkSavingsCapacity(savingsAccount, requestedLoanAmount);
+        String result = creditService.evaluateSavingsCapacity(
+                hasMinimumBalance,
+                hasConsistentSavings,
+                hasRegularDeposits,
+                meetsBalanceYears,
+                hasNoRecentWithdrawals
+        );
+
         return ResponseEntity.ok(result);
     }
-     */
 
 }

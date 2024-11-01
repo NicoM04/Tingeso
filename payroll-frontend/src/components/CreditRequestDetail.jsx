@@ -21,17 +21,22 @@ import DownloadIcon from '@mui/icons-material/Download';
 const CreditRequestDetail = () => {
   const { creditId } = useParams();
   const [credit, setCredit] = useState(null);
+  const [user, setUser] = useState(null);  // Nuevo estado para el usuario
   const [documents, setDocuments] = useState([]);
-  const [rules, setRules] = useState([]); // Nuevo estado para las reglas
+  const [rules, setRules] = useState([]);
   const [ruleInputs, setRuleInputs] = useState({
     employmentYears: 0,
     isSelfEmployed: false,
     incomeYears: 0,
     totalDebt: 0,
     monthlyIncome: 0,
-    applicantAge:0,
-
-  }); // Para almacenar entradas de usuario
+    applicantAge: 0,
+    hasMinimumBalance: false,
+    hasConsistentSavings: false,
+    hasRegularDeposits: false,
+    meetsBalanceYears: false,
+    hasNoRecentWithdrawals: false,
+  });
 
   useEffect(() => {
     const fetchCreditDetails = async () => {
@@ -39,10 +44,13 @@ const CreditRequestDetail = () => {
         const creditResponse = await CreditService.get(creditId);
         setCredit(creditResponse.data);
 
-        const documentResponse = await DocumentService.getDocumentsByCreditId(creditId);
-        setDocuments(documentResponse.data); 
+        // Obtener el usuario por ID del crédito
+        const userResponse = await CreditService.getUserByCreditId(creditId);
+        setUser(userResponse.data); // Guardar el usuario en el estado
 
-        // Simulando la carga de reglas. Aquí deberías implementar la lógica real para obtener las reglas asociadas al crédito.
+        const documentResponse = await DocumentService.getDocumentsByCreditId(creditId);
+        setDocuments(documentResponse.data);
+        
         setRules([
           { id: 1, description: "R1: Relación cuota/ingreso", requiresInput: true },
           { id: 2, description: "R2: Buen historial crediticio", requiresInput: false },
@@ -50,6 +58,7 @@ const CreditRequestDetail = () => {
           { id: 4, description: "R4: Relación deuda/ingreso", requiresInput: true },
           { id: 5, description: "R5: Monto máximo financiable", requiresInput: true },
           { id: 6, description: "R6: Edad del solicitante", requiresInput: true },
+          { id: 7, description: "R7: Capacidad de Ahorro", requiresInput: false },
         ]);
       } catch (error) {
         console.error('Error al obtener los detalles del crédito:', error);
@@ -63,35 +72,29 @@ const CreditRequestDetail = () => {
 
   const handleDownload = async (documentId) => {
     try {
-        // Llamar al servicio para descargar el documento
-        const response = await DocumentService.downloadDocument(documentId, { responseType: 'blob' }); // Asegúrate de especificar que esperas un blob
-        
-        // Crear un enlace para descargar el archivo
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
+      const response = await DocumentService.downloadDocument(documentId, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
 
-        // Asegúrate de usar el nombre del archivo correcto, incluyendo la extensión
-        const fileName = response.headers['content-disposition'] 
-            ? response.headers['content-disposition'].match(/filename="(.+)"/)[1] 
-            : `document_${documentId}.pdf`; // Valor por defecto si no se encuentra el nombre en la cabecera
+      const fileName = response.headers['content-disposition'] 
+          ? response.headers['content-disposition'].match(/filename="(.+)"/)[1] 
+          : `document_${documentId}.pdf`;
 
-        link.href = url;
-        link.setAttribute('download', fileName); // Asigna el nombre del archivo con la extensión
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        
-        // Opcional: liberar el objeto URL
-        window.URL.revokeObjectURL(url);
-        
-        alert('Documento descargado exitosamente.');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+      alert('Documento descargado exitosamente.');
     } catch (error) {
-        console.error('Error al descargar el documento:', error);
-        alert('Hubo un error al descargar el documento.');
+      console.error('Error al descargar el documento:', error);
+      alert('Hubo un error al descargar el documento.');
     }
-};
+  };
 
-const handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setRuleInputs((prevInputs) => ({
       ...prevInputs,
@@ -103,62 +106,60 @@ const handleInputChange = (e) => {
     let result;
     switch (rule.id) {
       case 1:
-        // Relación cuota/ingreso
         result = await CreditService.checkIncomeToPaymentRatio(credit, ruleInputs.monthlyIncome);
         alert(`R1 cumplida: ${result.data}`);
         break;
+
       case 2:
-        // Buen historial crediticio
-        result = await CreditService.checkCreditHistory(ruleInputs.hasGoodCreditHistory);
+        result = await CreditService.checkCreditHistory(true);
         alert(`R2 cumplida: ${result.data}`);
         break;
-        case 3:
-          // Estabilidad laboral (R3)
-          const incomeYears = ruleInputs.isSelfEmployed ? ruleInputs.incomeYears : 0;
 
-          result = await CreditService.checkEmploymentStability(
-            ruleInputs.employmentYears,
-            ruleInputs.isSelfEmployed,
-            incomeYears
-          );
+      case 3:
+        const incomeYears = ruleInputs.isSelfEmployed ? ruleInputs.incomeYears : 0;
+        result = await CreditService.checkEmploymentStability(
+          ruleInputs.employmentYears,
+          ruleInputs.isSelfEmployed,
+          incomeYears
+        );
+        alert(`R3 cumplida: ${result.data}`);
+        break;
 
-          alert(`R3 cumplida: ${result.data}`);
-          break;
-          
-        case 4:
-          // Imprimir en consola los valores enviados al backend para R4
-          console.log('Datos enviados para R4 - Relación Deuda/Ingreso:', {
-            totalDebt: ruleInputs.totalDebt,
-            monthlyIncome: ruleInputs.monthlyIncome,
-          });
+      case 4:
+        result = await CreditService.checkDebtToIncomeRatio(
+          credit,
+          ruleInputs.totalDebt,
+          ruleInputs.monthlyIncome
+        );
+        alert(`R4 cumplida: ${result.data}`);
+        break;
 
-          // Lógica para la regla 4 (R4): Relación Deuda/Ingreso
-          result = await CreditService.checkDebtToIncomeRatio(
-            credit, // Enviar un objeto vacío como credit para que el backend lo maneje
-            ruleInputs.totalDebt,
-            ruleInputs.monthlyIncome
-          );
-          alert(`R4 cumplida: ${result.data}`);
-          break;
       case 5:
-        // Monto máximo financiable
         result = await CreditService.checkMaximumLoanAmount(credit, ruleInputs.propertyValue);
         alert(`R5 cumplida: ${result.data}`);
         break;
-        case 6:
-            // Edad del solicitante
-            result = await CreditService.checkApplicantAge(ruleInputs.applicantAge, credit);
-            alert(`R6 cumplida: ${result.data}`);
-            break;
-        
-        
+
+      case 6:
+        result = await CreditService.checkApplicantAge(ruleInputs.applicantAge, credit);
+        alert(`R6 cumplida: ${result.data}`);
+        break;
+
+      case 7:
+        result = await CreditService.checkSavingsCapacity(
+          ruleInputs.hasMinimumBalance,
+          ruleInputs.hasConsistentSavings,
+          ruleInputs.hasRegularDeposits,
+          ruleInputs.meetsBalanceYears,
+          ruleInputs.hasNoRecentWithdrawals
+        );
+        alert(`R7 cumplida: ${result.data}`);
+        break;
 
       default:
         break;
     }
   };
 
-  // Mapa de etiquetas para cada regla
   const ruleInputLabels = {
     1: "Ingresos Mensuales",
     3: "Años de Antigüedad Laboral",
@@ -167,72 +168,35 @@ const handleInputChange = (e) => {
     6: "Edad del Solicitante",
   };
 
+  const savingsRuleInputs = [
+    { id: 'hasMinimumBalance', label: 'Saldo Mínimo Requerido' },
+    { id: 'hasConsistentSavings', label: 'Historial de Ahorro Consistente' },
+    { id: 'hasRegularDeposits', label: 'Depósitos Periódicos' },
+    { id: 'meetsBalanceYears', label: 'Relación Saldo/Años de Antigüedad' },
+    { id: 'hasNoRecentWithdrawals', label: 'Sin Retiros Recientes' },
+  ];
+
   return (
     <div style={{ padding: '20px' }}>
-      <Typography variant="h4" gutterBottom>
-        Detalle de la Solicitud de Crédito
-      </Typography>
+      <Typography variant="h4" gutterBottom>Detalle de la Solicitud de Crédito</Typography>
       {credit ? (
         <>
           <Paper elevation={3} style={{ padding: '20px', borderRadius: '8px' }}>
-            <Typography variant="h6" gutterBottom>
-              Información del Crédito
-            </Typography>
+            <Typography variant="h6" gutterBottom>Información del Crédito</Typography>
             <Divider />
             <Grid container spacing={2} style={{ marginTop: '10px' }}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>ID del Cliente:</strong> {credit.clientId}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>Tipo de Crédito:</strong> {credit.type}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>Estado:</strong> {credit.status}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>Monto Solicitado:</strong> ${credit.amount}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>Fecha de Solicitud:</strong> {new Date(credit.requestDate).toLocaleDateString()}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>Plazo:</strong> {credit.term} meses</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1"><strong>Tasa de Interés:</strong> {credit.interestRate}%</Typography>
-              </Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Nombre del Cliente:</strong> {user ? user.name : 'Cargando...'}</Typography></Grid> {/* Cambiado de ID a Nombre */}
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Tipo de Crédito:</strong> {credit.typeLoan ? credit.typeLoan : 'Cargando...'}</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Estado:</strong> {credit.state ? credit.state : 'Cargando...'}</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Monto Solicitado:</strong> ${credit.amount}</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Fecha de Solicitud:</strong> {new Date(credit.requestDate).toLocaleDateString()}</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Plazo:</strong> {credit.dueDate ? credit.dueDate : 'Cargando...'} años</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Tasa de Interés:</strong> {credit.interestRate}%</Typography></Grid>
             </Grid>
           </Paper>
 
-          {/* Bloque de Documentos Asociados */}
           <Paper elevation={3} style={{ padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
-            <Typography variant="h6" gutterBottom>
-              Documentos Asociados
-            </Typography>
-            <Divider />
-            {documents.length > 0 ? (
-              <List>
-                {documents.map((doc) => (
-                  <ListItem key={doc.id}>
-                    <ListItemText primary={doc.fileName} />
-                    <ListItemSecondaryAction>
-                      <IconButton edge="end" aria-label="download" onClick={() => handleDownload(doc.id)}>
-                        <DownloadIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Typography variant="body1">No hay documentos asociados a esta solicitud de crédito.</Typography>
-            )}
-          </Paper>
-
-          {/* Nuevo Bloque de Reglas */}
-          <Paper elevation={3} style={{ padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
-            <Typography variant="h6" gutterBottom>
-              Reglas del Crédito
-            </Typography>
+            <Typography variant="h6" gutterBottom>Reglas del Crédito</Typography>
             <Divider />
             {rules.length > 0 ? (
               <List>
@@ -261,6 +225,23 @@ const handleInputChange = (e) => {
                         />
                         <Button variant="contained" onClick={() => checkRule(rule)}>
                           Verificar
+                        </Button>
+                      </div>
+                    )}
+                    {rule.id === 7 && ( // Sección de la nueva regla de capacidad de ahorro
+                      <div style={{ marginLeft: '20px' }}>
+                        {savingsRuleInputs.map((input) => (
+                          <div key={input.id}>
+                            <Checkbox
+                              checked={ruleInputs[input.id]}
+                              onChange={handleInputChange}
+                              name={input.id}
+                            />
+                            <ListItemText primary={input.label} />
+                          </div>
+                        ))}
+                        <Button variant="contained" onClick={() => checkRule(rule)}>
+                          Verificar Capacidad de Ahorro
                         </Button>
                       </div>
                     )}
