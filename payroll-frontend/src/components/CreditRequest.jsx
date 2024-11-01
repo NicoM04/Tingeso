@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Paper, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Grid, Paper, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, TextField, Button } from '@mui/material';
 import CreditService from '../services/credit.service';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +13,9 @@ const creditTypes = [
 const CreditRequest = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedCreditType, setSelectedCreditType] = useState(null);
+    const [amount, setAmount] = useState(0); // Nuevo estado para el monto
+    const [dueDate, setDueDate] = useState(0); // Nuevo estado para el plazo
     const navigate = useNavigate();
     const [idClient, setUserId] = useState(null);
 
@@ -28,16 +31,24 @@ const CreditRequest = () => {
     }, []);
 
     // Manejar la selección del tipo de crédito
-    const handleCreditTypeChange = async (event) => {
+    const handleCreditTypeChange = (event) => {
         const creditTypeId = parseInt(event.target.value);
-        const selectedCreditType = creditTypes.find(type => type.id === creditTypeId);
+        const selectedType = creditTypes.find(type => type.id === creditTypeId);
+        setSelectedCreditType(selectedType); // Establecer el tipo de crédito seleccionado
+        setAmount(0); // Reiniciar monto
+        setDueDate(0); // Reiniciar plazo
+    };
 
+    // Manejar el envío del formulario
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         const creditRequest = {
             typeLoan: selectedCreditType.id,
-            amount: 100000, // Puedes personalizar este valor
+            amount: amount, // Monto proporcionado por el usuario
             interestRate: Math.max(...selectedCreditType.interestRate.split('%')[0].split('-').map(parseFloat)),
-            dueDate: selectedCreditType.maxTerm,
+            dueDate: dueDate, // Plazo proporcionado por el usuario
             idClient: idClient, // Asignar el ID del usuario autenticado
+            state: 1
         };
 
         try {
@@ -46,9 +57,7 @@ const CreditRequest = () => {
             // Guardar el crédito en el backend
             const saveResponse = await CreditService.create(creditRequest);
             const savedCreditId = saveResponse.data.id;
-            const savedCreditIduser = saveResponse.data.idClient;
             console.log('Crédito guardado con ID:', savedCreditId);
-            console.log('Crédito guardado con ID usre:', savedCreditIduser);
 
             // Redirigir a la página de carga de documentos con el ID del crédito
             navigate(`/upload-documents/${savedCreditId}`);
@@ -89,6 +98,32 @@ const CreditRequest = () => {
                             ))}
                         </RadioGroup>
                     </FormControl>
+
+                    {selectedCreditType && (
+                        <>
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Monto del Préstamo"
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                required
+                            />
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Plazo (en años)"
+                                type="number"
+                                value={dueDate}
+                                onChange={(e) => setDueDate(e.target.value)}
+                                required
+                            />
+                            <Button variant="contained" onClick={handleSubmit} fullWidth>
+                                Solicitar Crédito
+                            </Button>
+                        </>
+                    )}
 
                     {error && (
                         <Typography color="error" mt={2}>

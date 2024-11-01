@@ -64,6 +64,12 @@ public class CreditController {
     }
     //creo q esta mal esto
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<CreditEntity> updateCreditStatus(@PathVariable Long id, @RequestParam int newStatus) {
+        CreditEntity creditUpdated = creditService.updateCreditStatus(id, newStatus);
+        return ResponseEntity.ok(creditUpdated);
+    }
+
 
     // para simular un crédito
     @PostMapping("/simulate")

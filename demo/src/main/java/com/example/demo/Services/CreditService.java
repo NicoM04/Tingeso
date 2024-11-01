@@ -61,7 +61,17 @@ public class CreditService {
         }
 
     }
+    // Nuevo método para actualizar el estado del crédito
+    public CreditEntity updateCreditStatus(Long creditId, int newStatus) {
+        CreditEntity credit = creditRepository.findById(creditId)
+                .orElseThrow(() -> new RuntimeException("Crédito no encontrado con ID: " + creditId));
 
+        // Actualizar el estado
+        credit.setState(newStatus);
+
+        // Guardar y devolver el crédito actualizado
+        return creditRepository.save(credit);
+    }
     // Calcula la cuota mensual según la fórmula proporcionada
     public double calculateMonthlyPayment(double loanAmount, double annualInterestRate, int termInYears) {
         double monthlyInterestRate = annualInterestRate / 12 / 100;  // Convertir la tasa anual a tasa mensual

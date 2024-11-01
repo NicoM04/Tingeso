@@ -15,13 +15,15 @@ import {
   Checkbox,
   TextField,
   Button,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 
 const CreditRequestDetail = () => {
   const { creditId } = useParams();
   const [credit, setCredit] = useState(null);
-  const [user, setUser] = useState(null);  // Nuevo estado para el usuario
+  const [user, setUser] = useState(null); 
   const [documents, setDocuments] = useState([]);
   const [rules, setRules] = useState([]);
   const [ruleInputs, setRuleInputs] = useState({
@@ -37,6 +39,21 @@ const CreditRequestDetail = () => {
     meetsBalanceYears: false,
     hasNoRecentWithdrawals: false,
   });
+
+  // Nuevos estados disponibles para la solicitud
+  const statusOptions = [
+    { id: 1, label: 'En Revisión Inicial' },
+    { id: 2, label: 'Pendiente de Documentación' },
+    { id: 3, label: 'En Evaluación' },
+    { id: 4, label: 'Pre-Aprobada' },
+    { id: 5, label: 'En Aprobación Final' },
+    { id: 6, label: 'Aprobada' },
+    { id: 7, label: 'Rechazada' },
+    { id: 8, label: 'Cancelada por el Cliente' },
+    { id: 9, label: 'En Desembolso' },
+  ];
+
+  const [selectedStatus, setSelectedStatus] = useState('');
 
   useEffect(() => {
     const fetchCreditDetails = async () => {
@@ -160,6 +177,20 @@ const CreditRequestDetail = () => {
     }
   };
 
+  const handleChangeStatus = async () => {
+    if (selectedStatus) {
+      try {
+        await CreditService.updateCreditStatus(creditId, selectedStatus);
+        alert('Estado actualizado correctamente.');
+        const updatedCredit = await CreditService.get(creditId);
+        setCredit(updatedCredit.data);
+      } catch (error) {
+        console.error('Error al actualizar el estado del crédito:', error);
+        alert('Hubo un error al actualizar el estado del crédito.');
+      }
+    }
+  };
+
   const ruleInputLabels = {
     1: "Ingresos Mensuales",
     3: "Años de Antigüedad Laboral",
@@ -176,7 +207,7 @@ const CreditRequestDetail = () => {
     { id: 'hasNoRecentWithdrawals', label: 'Sin Retiros Recientes' },
   ];
 
-  return (
+    return (
     <div style={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>Detalle de la Solicitud de Crédito</Typography>
       {credit ? (
@@ -185,14 +216,55 @@ const CreditRequestDetail = () => {
             <Typography variant="h6" gutterBottom>Información del Crédito</Typography>
             <Divider />
             <Grid container spacing={2} style={{ marginTop: '10px' }}>
-              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Nombre del Cliente:</strong> {user ? user.name : 'Cargando...'}</Typography></Grid> {/* Cambiado de ID a Nombre */}
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Nombre del Cliente:</strong> {user ? user.name : 'Cargando...'}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Tipo de Crédito:</strong> {credit.typeLoan ? credit.typeLoan : 'Cargando...'}</Typography></Grid>
-              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Estado:</strong> {credit.state ? credit.state : 'Cargando...'}</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Estado:</strong> {credit.state}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Monto Solicitado:</strong> ${credit.amount}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Fecha de Solicitud:</strong> {new Date(credit.requestDate).toLocaleDateString()}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Plazo:</strong> {credit.dueDate ? credit.dueDate : 'Cargando...'} años</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Tasa de Interés:</strong> {credit.interestRate}%</Typography></Grid>
             </Grid>
+          </Paper>
+          
+          <Paper elevation={3} style={{ padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
+            <Typography variant="h6" gutterBottom>Cambiar Estado de la Solicitud</Typography>
+            <Divider />
+            <Select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              displayEmpty
+              fullWidth
+              style={{ marginTop: '10px', marginBottom: '10px' }}
+            >
+              <MenuItem value="" disabled>Seleccionar estado</MenuItem>
+              {statusOptions.map((status) => (
+                <MenuItem key={status.id} value={status.id}>
+                  {status.label}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button variant="contained" onClick={handleChangeStatus}>Actualizar Estado</Button>
+          </Paper>
+
+          <Paper elevation={3} style={{ padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
+            <Typography variant="h6" gutterBottom>Documentos Asociados</Typography>
+            <Divider />
+            {documents.length > 0 ? (
+              <List>
+                {documents.map((doc) => (
+                  <ListItem key={doc.id}>
+                    <ListItemText primary={doc.fileName} />
+                    <ListItemSecondaryAction>
+                      <IconButton edge="end" aria-label="download" onClick={() => handleDownload(doc.id)}>
+                        <DownloadIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body1">No hay documentos asociados a esta solicitud de crédito.</Typography>
+            )}
           </Paper>
 
           <Paper elevation={3} style={{ padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
@@ -218,7 +290,7 @@ const CreditRequestDetail = () => {
                                 rule.id === 4 ? "totalDebt" : 
                                 rule.id === 5 ? "propertyValue" : 
                                 rule.id === 6 ? "applicantAge" : ""}
-                          label={ruleInputLabels[rule.id] || "Ingrese valor"}
+                          label={`Valor para ${rule.description}`}
                           type="number"
                           onChange={handleInputChange}
                           style={{ marginRight: '10px' }}

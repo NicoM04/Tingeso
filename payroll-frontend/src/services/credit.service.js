@@ -20,6 +20,11 @@ const update = data => {
     return httpClient.put('/api/credit/', data);
 };
 
+
+const updateCreditStatus = (creditId, newStatus) => {
+    return httpClient.patch(`/api/credit/${creditId}/status?newStatus=${newStatus}`);
+};
+
 // Eliminar un crédito por ID
 const remove = id => {
     return httpClient.delete(`/api/credit/${id}`);
@@ -57,8 +62,6 @@ const checkIncomeToPaymentRatio = (data, monthlyIncome) => {
 const checkCreditHistory = (hasGoodCreditHistory) => {
     return httpClient.post(`/api/credit/check-credit-history?hasGoodCreditHistory=${hasGoodCreditHistory}`);
 };
-
-
 
 
 
@@ -109,5 +112,6 @@ export default {
     checkMaximumLoanAmount,
     checkApplicantAge,
     checkSavingsCapacity,
-    getUserByCreditId
+    getUserByCreditId,
+    updateCreditStatus
 };
