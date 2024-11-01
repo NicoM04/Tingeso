@@ -96,6 +96,12 @@ const checkSavingsCapacity = (hasMinimumBalance, hasConsistentSavings, hasRegula
 const getUserByCreditId = (creditId) => {
     return httpClient.get(`/api/credit/${creditId}/user`);
 };
+// Obtener todos los créditos de un cliente por ID
+const getCreditsByClientId = (clientId) => {
+    return httpClient.get(`/api/credit/client/${clientId}`);
+};
+
+
 export default {
     getAll,
     get,
@@ -113,5 +119,6 @@ export default {
     checkApplicantAge,
     checkSavingsCapacity,
     getUserByCreditId,
-    updateCreditStatus
+    updateCreditStatus,
+    getCreditsByClientId
 };

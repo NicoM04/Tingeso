@@ -32,6 +32,13 @@ public class CreditController {
         return ResponseEntity.ok(credit);
     }
 
+    // Obtener créditos por ID de cliente
+    @GetMapping("/client/{idClient}") // Cambiado a idClient
+    public ResponseEntity<List<CreditEntity>> getCreditsByClientId(@PathVariable Long idClient) {
+        List<CreditEntity> credits = creditService.getCreditsByClientId(idClient);
+        return ResponseEntity.ok(credits);
+    }
+
     @PostMapping("/")
     public ResponseEntity<CreditEntity> saveCredit(@RequestBody CreditEntity credit) {
         CreditEntity creditNew = creditService.saveCredit(credit);

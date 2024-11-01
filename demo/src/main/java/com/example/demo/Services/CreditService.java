@@ -28,6 +28,11 @@ public class CreditService {
         return creditRepository.findById(id).get();
     }
 
+    // Obtener créditos por ID de cliente
+    public List<CreditEntity> getCreditsByClientId(Long idClient) {
+        return creditRepository.findByIdClient(idClient); // Cambiado a idClient
+    }
+
     public int getAmountById(Long id) {
         return creditRepository.findById(id).get().getAmount();
     }
