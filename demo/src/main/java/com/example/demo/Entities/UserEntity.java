@@ -25,7 +25,4 @@ public class UserEntity {
     public String phoneN;
     public String password;
     public boolean isEjecutive;
-
-
-
 }

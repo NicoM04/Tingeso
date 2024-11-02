@@ -33,9 +33,6 @@ public class CreditService {
         return creditRepository.findByIdClient(idClient); // Cambiado a idClient
     }
 
-    public int getAmountById(Long id) {
-        return creditRepository.findById(id).get().getAmount();
-    }
 
     public CreditEntity saveCredit(CreditEntity credit) {
         // Calcular el pago mensual
@@ -64,19 +61,17 @@ public class CreditService {
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-
     }
+
+
     // Nuevo método para actualizar el estado del crédito
     public CreditEntity updateCreditStatus(Long creditId, int newStatus) {
         CreditEntity credit = creditRepository.findById(creditId)
                 .orElseThrow(() -> new RuntimeException("Crédito no encontrado con ID: " + creditId));
-
-        // Actualizar el estado
-        credit.setState(newStatus);
-
-        // Guardar y devolver el crédito actualizado
-        return creditRepository.save(credit);
+        credit.setState(newStatus);// Actualizar el estado
+        return creditRepository.save(credit);// Guardar y devolver el crédito actualizado
     }
+
     // Calcula la cuota mensual según la fórmula proporcionada
     public double calculateMonthlyPayment(double loanAmount, double annualInterestRate, int termInYears) {
         double monthlyInterestRate = annualInterestRate / 12 / 100;  // Convertir la tasa anual a tasa mensual
@@ -95,68 +90,6 @@ public class CreditService {
         );
         credit.setMonthlyPayment(monthlyPayment);
         return credit;
-    }
-
-
-    /**
-     * Crear una solicitud de crédito y asociar los documentos requeridos según el tipo de préstamo.
-     * @param credit solicitud de crédito
-     * @param files archivos subidos por el cliente
-     * @return El crédito creado con los documentos asociados
-     * @throws Exception si no se reciben los archivos correctos
-     */
-    public CreditEntity createCreditWithDocuments(CreditEntity credit, MultipartFile[] files) throws Exception {
-        // 1. Determinar cuántos documentos se necesitan según el tipo de préstamo
-        int requiredDocuments = getRequiredDocumentsCount(credit.getTypeLoan());
-
-        // 2. Validar que se haya recibido la cantidad correcta de archivos
-        if (files.length != requiredDocuments) {
-            throw new Exception("Debe subir " + requiredDocuments + " documentos para este tipo de préstamo.");
-        }
-
-        // 3. Guardar el crédito en la base de datos
-        CreditEntity savedCredit = creditRepository.save(credit);
-
-        // 4. Guardar los archivos en el servidor y crear los DocumentEntity relacionados
-        List<DocumentEntity> documents = new ArrayList<>();
-        for (MultipartFile file : files) {
-            // Guardar el archivo en el sistema de archivos
-            String fileName = file.getOriginalFilename();
-            Path filePath = Paths.get(UPLOAD_DIR + fileName);
-            Files.copy(file.getInputStream(), filePath);
-
-            // Crear la entidad DocumentEntity con la ruta del archivo
-            DocumentEntity document = new DocumentEntity();
-            document.setFileName(fileName);
-            document.setFilePath(filePath.toString());
-            document.setCreditId(credit.getId());  // Relacionar el documento con el crédito
-            documents.add(document);
-        }
-
-        // 5. Guardar los documentos en la base de datos
-        documentRepository.saveAll(documents);
-
-        return savedCredit;  // Devolver el crédito con los documentos guardados
-    }
-
-    /**
-     * Obtener la cantidad de documentos requeridos según el tipo de préstamo.
-     * @param typeLoan tipo de préstamo (1, 2, 3, 4)
-     * @return cantidad de documentos requeridos
-     */
-    private int getRequiredDocumentsCount(int typeLoan) {
-        switch (typeLoan) {
-            case 1: // Primera Vivienda
-                return 3;  // Ejemplo: 3 documentos requeridos
-            case 2: // Segunda Vivienda
-                return 4;  // Ejemplo: 4 documentos requeridos
-            case 3: // Propiedades Comerciales
-                return 4;  // Ejemplo: 4 documentos requeridos
-            case 4: // Remodelación
-                return 3;  // Ejemplo: 3 documentos requeridos
-            default:
-                throw new IllegalArgumentException("Tipo de préstamo inválido.");
-        }
     }
 
 
@@ -187,25 +120,11 @@ public class CreditService {
         // Aquí se podría extender la lógica para incluir consultas adicionales,
         // como revisar una base de datos o implementar reglas adicionales para evaluar el historial.
         if (!hasGoodCreditHistory) {
-            // Si el cliente no tiene un buen historial, retorna false
-            return false;
+            return false; // Si el cliente no tiene un buen historial, retorna false
         }
-
-        // Retorna true si el historial es bueno
-        return true;
+        return true; // Retorna true si el historial es bueno
     }
 
-
-    /**
-     * R3: Antigüedad Laboral y Estabilidad.
-     * El cliente debe tener al menos 1-2 años de antigüedad en su empleo actual.
-     * Si es trabajador independiente, se revisan los ingresos de los últimos 2 años.
-     *
-     * @param employmentYears Años en el empleo actual.
-     * @param isSelfEmployed Si el cliente es trabajador independiente.
-     * @param incomeYears Años de ingresos estables (si es trabajador independiente).
-     * @return true si cumple con la estabilidad laboral, false si no.
-     */
     public boolean checkEmploymentStability(int employmentYears, boolean isSelfEmployed, int incomeYears) {
         if (isSelfEmployed) {
             // Si es independiente, revisar los últimos 2 años de ingresos estables

@@ -5,6 +5,8 @@ import com.example.demo.Entities
         .CreditEntity;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface CreditRepository extends JpaRepository<CreditEntity, Long> {
     CreditEntity findById(long id);

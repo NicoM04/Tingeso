@@ -30,29 +30,11 @@ const remove = id => {
     return httpClient.delete(`/api/credit/${id}`);
 };
 
-// Obtener el monto de un crédito por ID
-const getAmountById = id => {
-    return httpClient.get(`/api/credit/amount/${id}`);
-};
-
 // Simular un crédito
 const simulateCredit = data => {
     return httpClient.post("/api/credit/simulate", data);
 };
 
-// Crear un crédito con documentos
-const createCreditWithDocuments = (data, files) => {
-    const formData = new FormData();
-    formData.append("credit", new Blob([JSON.stringify(data)], { type: 'application/json' }));
-    Array.from(files).forEach((file, i) => {
-        formData.append("files", file);
-    });
-    return httpClient.post("/api/credit/create", formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    });
-};
 
 // Verificar la relación cuota/ingreso
 const checkIncomeToPaymentRatio = (data, monthlyIncome) => {
@@ -108,9 +90,7 @@ export default {
     create,
     update,
     remove,
-    getAmountById,
     simulateCredit,
-    createCreditWithDocuments,
     checkIncomeToPaymentRatio,
     checkCreditHistory,
     checkEmploymentStability,

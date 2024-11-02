@@ -57,18 +57,6 @@ public class CreditController {
         return ResponseEntity.noContent().build();
     }
 
-
-    @GetMapping("/amount/{id}")
-    public int getAmountById(@PathVariable Long id) {
-        return creditService.getAmountById(id);
-    }
-
-
-    @PutMapping("/update-state")
-    public ResponseEntity<CreditEntity> updateState(@RequestBody CreditEntity credit){
-        CreditEntity creditUpdated = creditService.updateCredit(credit);
-        return ResponseEntity.ok(creditUpdated);
-    }
     //creo q esta mal esto
 
     @PatchMapping("/{id}/status")
@@ -90,20 +78,7 @@ public class CreditController {
         return ResponseEntity.ok(simulatedCredit);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createCredit(@RequestBody CreditEntity credit,
-                                               @RequestParam("files") MultipartFile[] files) {
-        try {
 
-            // 2. Llamar al servicio para procesar la creación del crédito y la subida de documentos
-            creditService.createCreditWithDocuments(credit, files);
-
-            return ResponseEntity.ok("Crédito creado y documentos subidos correctamente.");
-
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body("Error: " + e.getMessage());
-        }
-    }
 
     @GetMapping("/{id}/user")
     public ResponseEntity<UserEntity> getUserByCreditId(@PathVariable Long id) {
