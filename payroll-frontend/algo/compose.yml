@@ -1,0 +1,115 @@
+services:
+  # Nginx servers
+  nginx-frontend:
+    image: nginx
+    container_name: nginx-frontend-container
+    restart: always
+    ports:
+      - 8090:8090
+    volumes:
+      - ./frontend.conf:/etc/nginx/nginx.conf
+      - ./src/http-common.js:/usr/share/nginx/html/src/http-common.js 
+    networks:
+      - frontend-network
+    depends_on:
+      - frontend1
+      - frontend2
+      - frontend3
+
+  nginx-backend:
+    image: nginx
+    container_name: nginx-backend-container
+    restart: always
+    ports:
+      - 8091:80
+    volumes:
+      - ./backend.conf:/etc/nginx/nginx.conf
+    networks:
+      - backend-network
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+
+  # MySQL service
+  mysql:
+    container_name: mysql-container
+    image: mysql:8.0
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: password  
+      MYSQL_DATABASE: new_schema
+    ports:
+      - "3306:3306"
+    networks:
+      - backend-network
+    volumes:
+      - mysql_data:/var/lib/mysql 
+
+  # Backend services
+  backend1:
+    container_name: backend-container-1
+    image: nicom04/spring-image
+    environment:
+      - DB_HOST=mysql-container
+    networks:
+      - backend-network
+    depends_on:
+      - mysql
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  backend2:
+    container_name: backend-container-2
+    image: nicom04/spring-image
+    environment:
+      - DB_HOST=mysql-container
+    networks:
+      - backend-network
+    depends_on:
+      - mysql
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  backend3:
+    container_name: backend-container-3
+    image: nicom04/spring-image
+    environment:
+      - DB_HOST=mysql-container
+    networks:
+      - backend-network
+    depends_on:
+      - mysql
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  # Frontend services
+  frontend1:
+    container_name: frontend-container-1
+    image: nicom04/front-container
+    networks:
+      - frontend-network 
+
+  frontend2:
+    container_name: frontend-container-2
+    image: nicom04/front-container
+    networks:
+      - frontend-network 
+
+  frontend3:
+    container_name: frontend-container-3
+    image: nicom04/front-container
+    networks:
+      - frontend-network 
+
+volumes:
+  mysql_data:
+
+networks:
+  frontend-network:
+  backend-network:

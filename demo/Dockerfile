@@ -1,19 +1,15 @@
-FROM ubuntu:latest
-LABEL authors="Nicolas Morales"
+# Usa una imagen base de OpenJDK
+FROM openjdk:17-jdk-slim
 
-ENTRYPOINT ["top", "-b"]
-
-# Usar una imagen base de Java
-FROM openjdk:17-jre-slim
-
-# Crear un directorio para la aplicación
+# Establece el directorio de trabajo
 WORKDIR /app
 
-# Copiar el archivo .jar al contenedor
-COPY build/libs/tu-aplicacion.jar app.jar
+# Copia el archivo JAR al contenedor
+COPY build/libs/demo-0.0.1-SNAPSHOT.jar app.jar
 
-# Exponer el puerto que usa la aplicación
+# Expone el puerto en el que la aplicación va a correr
 EXPOSE 8090
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
+
