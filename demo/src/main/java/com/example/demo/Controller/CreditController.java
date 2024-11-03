@@ -5,6 +5,7 @@ import com.example.demo.Entities.UserEntity;
 import com.example.demo.Services.CreditService;
 import com.example.demo.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,10 +28,19 @@ public class CreditController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CreditEntity> getCreditById(@PathVariable Long id) {
-        CreditEntity credit = creditService.getCreditById(id);
-        return ResponseEntity.ok(credit);
+    public ResponseEntity<CreditEntity> getCreditById(@PathVariable("id") Long id) {
+        System.out.println("Request received for Credit ID: " + id); // Imprime el ID recibido
+        try {
+            CreditEntity credit = creditService.getCreditById(id);
+            System.out.println("Credit found: " + credit); // Imprime el objeto CreditEntity encontrado
+            return ResponseEntity.ok(credit);
+        } catch (Exception e) {
+            System.err.println("Error occurred while fetching Credit: " + e.getMessage()); // Imprime el error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
     }
+
 
     // Obtener créditos por ID de cliente
     @GetMapping("/client/{idClient}") // Cambiado a idClient
@@ -81,7 +91,7 @@ public class CreditController {
 
 
     @GetMapping("/{id}/user")
-    public ResponseEntity<UserEntity> getUserByCreditId(@PathVariable Long id) {
+    public ResponseEntity<UserEntity> getUserByCreditId(@PathVariable("id") Long id) {
         CreditEntity credit = creditService.getCreditById(id); // Busca el crédito por ID
         if (credit == null) {
             return ResponseEntity.notFound().build();

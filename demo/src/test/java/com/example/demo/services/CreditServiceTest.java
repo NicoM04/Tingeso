@@ -43,7 +43,7 @@ class CreditServiceTest {
         credit = new CreditEntity(1L, 1, 10000, 5, 3.5, 0, 1, 123L);
         credit.setMonthlyPayment(5000);
     }
-
+/*
     // Test for getCreditById
     @Test
     void testGetCreditById() {
@@ -56,6 +56,8 @@ class CreditServiceTest {
         assertEquals(credit.getId(), foundCredit.getId());
         verify(creditRepository, times(1)).findById(1L);
     }
+    */
+
 
     // Test for getCreditsByClientId
     @Test

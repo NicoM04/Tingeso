@@ -138,7 +138,7 @@ public class DocumentController {
      * @return Lista de documentos asociados al crédito.
      */
     @GetMapping("/byCredit/{creditId}")
-    public ResponseEntity<List<DocumentEntity>> getDocumentsByCreditId(@PathVariable Long creditId) {
+    public ResponseEntity<List<DocumentEntity>> getDocumentsByCreditId(@PathVariable("creditId") Long creditId) {
         List<DocumentEntity> documents = documentService.getDocumentsByCreditId(creditId);
 
         if (documents.isEmpty()) {

@@ -59,13 +59,16 @@ const CreditRequestDetail = () => {
     const fetchCreditDetails = async () => {
       try {
         const creditResponse = await CreditService.get(creditId);
+        console.log('Credit Data:', creditResponse.data); // Añade esta línea
         setCredit(creditResponse.data);
 
         // Obtener el usuario por ID del crédito
         const userResponse = await CreditService.getUserByCreditId(creditId);
+        console.log('User Data:', userResponse.data); // Añade esta línea
         setUser(userResponse.data); // Guardar el usuario en el estado
 
         const documentResponse = await DocumentService.getDocumentsByCreditId(creditId);
+        console.log('Documents:', documentResponse.data); // Añade esta línea
         setDocuments(documentResponse.data);
         
         setRules([
