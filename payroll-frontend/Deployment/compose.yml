@@ -21,7 +21,7 @@ services:
     container_name: nginx-backend-container
     restart: always
     ports:
-      - 8091:80
+      - 80:80
     volumes:
       - ./backend.conf:/etc/nginx/nginx.conf
     networks:
@@ -51,9 +51,15 @@ services:
   # Backend services
   backend1:
     container_name: backend-container-1
-    image: nicom04/spring-image
+    image: nicom04/backend-container
+    ports:
+      - 8091:8090
     environment:
-      - DB_HOST=mysql-container
+      DB_HOST: mysql-container
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      DB_PORT: 3306
+      DB_NAME: new_schema
     networks:
       - backend-network
     depends_on:
@@ -64,9 +70,15 @@ services:
 
   backend2:
     container_name: backend-container-2
-    image: nicom04/spring-image
+    image: nicom04/backend-container
+    ports:
+      - 8092:8090
     environment:
-      - DB_HOST=mysql-container
+      DB_HOST: mysql-container
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      DB_PORT: 3306
+      DB_NAME: new_schema
     networks:
       - backend-network
     depends_on:
@@ -77,9 +89,15 @@ services:
 
   backend3:
     container_name: backend-container-3
-    image: nicom04/spring-image
+    image: nicom04/backend-container
+    ports:
+      - 8093:8090
     environment:
-      - DB_HOST=mysql-container
+      DB_HOST: mysql-container
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      DB_PORT: 3306
+      DB_NAME: new_schema
     networks:
       - backend-network
     depends_on:
@@ -91,21 +109,36 @@ services:
   # Frontend services
   frontend1:
     container_name: frontend-container-1
-    image: nicom04/front-container
+    image: nicom04/frontend-container
+    ports:
+      - 3001:3000
     networks:
       - frontend-network 
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   frontend2:
     container_name: frontend-container-2
-    image: nicom04/front-container
+    image: nicom04/frontend-container
+    ports:
+      - 3002:3000
     networks:
       - frontend-network 
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   frontend3:
     container_name: frontend-container-3
-    image: nicom04/front-container
+    image: nicom04/frontend-container
+    ports:
+      - 3003:3000
     networks:
       - frontend-network 
+    deploy:
+      restart_policy:
+        condition: on-failure
 
 volumes:
   mysql_data:

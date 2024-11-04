@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class DocumentService {
 
-    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso";
+    private static final String UPLOAD_DIR = "C:\\Users\\nicol\\Desktop\\Tingeso";
 
     @Autowired
     private DocumentRepository documentRepository;

@@ -54,7 +54,7 @@ const SimulateCredit = () => {
         setResult(null);
 
         try {
-            const response = await axios.post('http://localhost:8080/api/credit/simulate', creditData);
+            const response = await axios.post('http://localhost:80/api/credit/simulate', creditData);
             setResult(response.data);
         } catch (error) {
             setResult({ error: "Failed to simulate the credit" });

@@ -27,7 +27,7 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
-    private static final String UPLOAD_DIR = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso";
+    private static final String UPLOAD_DIR = "C:\\Users\\nicol\\Desktop\\Tingeso";
 
     /**
      * Endpoint para subir un archivo.
