@@ -25,7 +25,7 @@ const Register = () => {
 
     try {
       // Enviar la solicitud de registro al backend
-      const response = await fetch("http://localhost:80/api/user/", {
+      const response = await fetch("http://52.137.120.247:80/api/user/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

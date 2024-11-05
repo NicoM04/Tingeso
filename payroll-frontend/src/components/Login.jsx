@@ -23,7 +23,7 @@ const Login = () => {
 
     try {
       // Enviar la solicitud de inicio de sesión al backend
-      const response = await fetch("http://localhost:80/api/user/login", {
+      const response = await fetch("http://52.137.120.247:80/api/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
