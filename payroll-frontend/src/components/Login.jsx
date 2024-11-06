@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate
-
+import userClient from "../services/userClient.service"; // Importa el servicio
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,37 +22,31 @@ const Login = () => {
     setLoading(true); // Activa el loading al iniciar sesión
 
     try {
-      // Enviar la solicitud de inicio de sesión al backend
-      const response = await fetch("http://52.137.120.247:80/api/user/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ mail: email, password }), // Envía el correo y la contraseña
-      });
+      // Llamar al método de login en el servicio
+      const response = await userClient.login(email, password);
 
-      if (response.ok) {
-        const data = await response.json();
+      // Verificar si la respuesta es correcta
+      if (response.status === 200) {
+        const data = response.data;
         console.log("Inicio de sesión exitoso:", data);
         
         // Guarda el usuario en el almacenamiento local
         localStorage.setItem("user", JSON.stringify(data));
         
-        // Notifica manualmente que se hizo un cambio en localStorage (por compatibilidad)
+        // Notifica cambios en localStorage para actualización en otros componentes
         window.dispatchEvent(new Event("storage"));
 
-        // Redirige a la página de perfil o a la página principal
-        navigate("/home"); // Cambia esto si quieres redirigir a otra página
+        // Redirige a la página principal o de perfil
+        navigate("/home");
       } else {
-        const errorData = await response.json();
-        console.error("Error al iniciar sesión:", errorData);
-        alert("Credenciales incorrectas. Inténtalo de nuevo."); // Muestra un mensaje de error
+        console.error("Error al iniciar sesión:", response.data);
+        alert("Credenciales incorrectas. Inténtalo de nuevo.");
       }
     } catch (error) {
       console.error("Error de conexión:", error);
-      alert("Error de conexión. Inténtalo de nuevo."); // Muestra un mensaje de error en caso de fallo de conexión
+      alert("Error de conexión. Inténtalo de nuevo.");
     } finally {
-      setLoading(false); // Desactiva el loading
+      setLoading(false);
     }
   };
 

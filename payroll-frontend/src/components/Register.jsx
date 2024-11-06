@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
+import userClient from "../services/userClient.service"; // Importa el servicio
 const Register = () => {
   const [name, setName] = useState("");
   const [rut, setRut] = useState("");
@@ -24,30 +24,24 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Enviar la solicitud de registro al backend
-      const response = await fetch("http://52.137.120.247:80/api/user/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name,
-          rut: rut,
-          mail: email,
-          phoneN: phone,
-          password: password,
-          isEjecutive: false, // Cambia según la lógica de tu aplicación
-        }),
+      // Llamar al método de registro (create) en el servicio
+      const response = await userClient.create({
+        name: name,
+        rut: rut,
+        mail: email,
+        phoneN: phone,
+        password: password,
+        isEjecutive: false, // Cambia según la lógica de tu aplicación
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         console.log("Registro exitoso:", data);
-        // Redirige a la página de inicio o de inicio de sesión
+        
+        // Redirige a la página de inicio de sesión
         navigate("/login");
       } else {
-        const errorData = await response.json();
-        console.error("Error al registrarse:", errorData);
+        console.error("Error al registrarse:", response.data);
         alert("Error al registrarse. Inténtalo de nuevo.");
       }
     } catch (error) {

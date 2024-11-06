@@ -25,10 +25,15 @@ const remove = id => {
     return httpClient.delete(`/api/user/${id}`);
 };
 
+// Método de autenticación para el login
+const login = (email, password) => {
+    return httpClient.post("/api/user/login", { mail: email, password });
+};
 export default {
     getAll,
     get,
     create,
     update,
-    remove
+    remove,
+    login
 };
