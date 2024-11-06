@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.Entities.DocumentEntity;
+import com.example.demo.Repository.CreditRepository;
 import com.example.demo.Repository.DocumentRepository;
 import com.example.demo.Services.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,19 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import java.io.InputStream;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class DocumentServiceTest {
@@ -28,10 +25,14 @@ class DocumentServiceTest {
     @Mock
     private DocumentRepository documentRepository;
 
+    @Mock
+    private CreditRepository creditRepository;
+
+    @Mock
+    private MultipartFile mockFile;
+
     @InjectMocks
     private DocumentService documentService;
-
-    private final String uploadDir = "C:\\Users\\Nicolas Morales\\Desktop\\repositorio\\Tingeso";
 
     @BeforeEach
     void setUp() {
@@ -39,88 +40,142 @@ class DocumentServiceTest {
     }
 
     @Test
-    void testSaveDocument_ShouldSaveDocument() throws IOException {
-        // Given
-        String fileName = "testFile.txt";
+    void testSaveDocument() throws IOException {
+        // Mock data for testing
         Long creditId = 1L;
-        Path filePath = Paths.get(uploadDir, fileName);
+        byte[] fileData = "sample file content".getBytes();
+        when(mockFile.getOriginalFilename()).thenReturn("testFile.txt");
+        when(mockFile.getBytes()).thenReturn(fileData);
 
-        DocumentEntity documentToSave = new DocumentEntity(null, fileName, filePath.toString(), creditId);
-        DocumentEntity savedDocument = new DocumentEntity(1L, fileName, filePath.toString(), creditId);
+        DocumentEntity savedDocument = new DocumentEntity();
+        savedDocument.setFileName("testFile.txt");
+        savedDocument.setFileData(fileData);
+        savedDocument.setCreditId(creditId);
 
+        // Mock the repository save behavior
         when(documentRepository.save(any(DocumentEntity.class))).thenReturn(savedDocument);
 
-        // When
-        DocumentEntity result = documentService.saveDocument(fileName, creditId);
+        // Call the method under test
+        DocumentEntity result = documentService.saveDocument(mockFile, creditId);
 
-        // Then
-        assertThat(result).isEqualTo(savedDocument);
+        // Assert the result
+        assertNotNull(result);
+        assertEquals("testFile.txt", result.getFileName());
+        assertArrayEquals(fileData, result.getFileData());
+        assertEquals(creditId, result.getCreditId());
+
+        // Verify save was called
         verify(documentRepository, times(1)).save(any(DocumentEntity.class));
     }
 
-
-
     @Test
-    void testGetDocumentById_ShouldReturnDocument() {
-        // Given
+    void testGetDocumentById_Found() {
+        // Mock data for testing
         Long documentId = 1L;
-        DocumentEntity document = new DocumentEntity(documentId, "testFile.txt", "some/path", 1L);
+        DocumentEntity document = new DocumentEntity();
+        document.setId(documentId);
+        document.setFileName("testFile.txt");
 
+        // Mock the repository behavior
         when(documentRepository.findById(documentId)).thenReturn(Optional.of(document));
 
-        // When
+        // Call the method under test
         DocumentEntity result = documentService.getDocumentById(documentId);
 
-        // Then
-        assertThat(result).isEqualTo(document);
+        // Assert the result
+        assertNotNull(result);
+        assertEquals("testFile.txt", result.getFileName());
+        assertEquals(documentId, result.getId());
+
+        // Verify findById was called
         verify(documentRepository, times(1)).findById(documentId);
     }
 
     @Test
-    void testGetDocumentById_ShouldThrowExceptionWhenNotFound() {
-        // Given
+    void testGetDocumentById_NotFound() {
         Long documentId = 1L;
 
+        // Mock the repository behavior
         when(documentRepository.findById(documentId)).thenReturn(Optional.empty());
 
-        // Then
-        assertThatThrownBy(() -> documentService.getDocumentById(documentId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Documento no encontrado");
+        // Call the method and assert exception
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            documentService.getDocumentById(documentId);
+        });
+
+        assertEquals("Documento no encontrado.", exception.getMessage());
+
+        // Verify findById was called
+        verify(documentRepository, times(1)).findById(documentId);
     }
 
     @Test
-    void testGetAllDocuments_ShouldReturnAllDocuments() {
-        // Given
-        DocumentEntity doc1 = new DocumentEntity(1L, "file1.txt", "path/to/file1", 1L);
-        DocumentEntity doc2 = new DocumentEntity(2L, "file2.txt", "path/to/file2", 2L);
-        List<DocumentEntity> documents = Arrays.asList(doc1, doc2);
+    void testGetAllDocuments() {
+        // Mock data for testing
+        List<DocumentEntity> documents = new ArrayList<>();
+        DocumentEntity doc1 = new DocumentEntity();
+        doc1.setFileName("file1.txt");
+        DocumentEntity doc2 = new DocumentEntity();
+        doc2.setFileName("file2.txt");
+        documents.add(doc1);
+        documents.add(doc2);
 
+        // Mock the repository behavior
         when(documentRepository.findAll()).thenReturn(documents);
 
-        // When
+        // Call the method under test
         List<DocumentEntity> result = documentService.getAllDocuments();
 
-        // Then
-        assertThat(result).isEqualTo(documents);
+        // Assert the result
+        assertEquals(2, result.size());
+        assertEquals("file1.txt", result.get(0).getFileName());
+        assertEquals("file2.txt", result.get(1).getFileName());
+
+        // Verify findAll was called
         verify(documentRepository, times(1)).findAll();
     }
 
     @Test
-    void testGetDocumentsByCreditId_ShouldReturnDocuments() {
-        // Given
+    void testGetDocumentsByCreditId() {
+        // Mock data for testing
         Long creditId = 1L;
-        DocumentEntity doc1 = new DocumentEntity(1L, "file1.txt", "path/to/file1", creditId);
-        DocumentEntity doc2 = new DocumentEntity(2L, "file2.txt", "path/to/file2", creditId);
-        List<DocumentEntity> documents = Arrays.asList(doc1, doc2);
+        List<DocumentEntity> documents = new ArrayList<>();
+        DocumentEntity doc1 = new DocumentEntity();
+        doc1.setCreditId(creditId);
+        documents.add(doc1);
 
+        // Mock the repository behavior
         when(documentRepository.findByCreditId(creditId)).thenReturn(documents);
 
-        // When
+        // Call the method under test
         List<DocumentEntity> result = documentService.getDocumentsByCreditId(creditId);
 
-        // Then
-        assertThat(result).isEqualTo(documents);
+        // Assert the result
+        assertEquals(1, result.size());
+        assertEquals(creditId, result.get(0).getCreditId());
+
+        // Verify findByCreditId was called
         verify(documentRepository, times(1)).findByCreditId(creditId);
+    }
+
+    @Test
+    void testGetDocumentData() {
+        // Mock data for testing
+        Long documentId = 1L;
+        byte[] fileData = "sample file content".getBytes();
+        DocumentEntity document = new DocumentEntity();
+        document.setFileData(fileData);
+
+        // Mock the repository behavior
+        when(documentRepository.findById(documentId)).thenReturn(Optional.of(document));
+
+        // Call the method under test
+        byte[] result = documentService.getDocumentData(documentId);
+
+        // Assert the result
+        assertArrayEquals(fileData, result);
+
+        // Verify findById was called
+        verify(documentRepository, times(1)).findById(documentId);
     }
 }
