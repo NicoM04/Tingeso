@@ -17,13 +17,9 @@ public class DocumentEntity {
     private Long id;
 
     private String fileName;  // Nombre del archivo
-    private String filePath;  // Ruta completa del archivo en el sistema de archivos
+    private Long creditId;  // ID del crédito asociado
 
-    private Long creditId;  // Relación con la entidad CreditEntity (si el documento está relacionado con un crédito)
-
-
-
-
-
-
+    @Lob
+    @Column(columnDefinition = "BLOB")
+    private byte[] fileData;  // Contenido del archivo en formato byte[]
 }
