@@ -96,7 +96,7 @@ const UserCreditTable = () => {
                                             <Button 
                                                 variant="contained" 
                                                 color="primary" 
-                                                onClick={() => navigate(`/creditDetails/${credit.id}`)}
+                                                onClick={() => navigate(`/userCreditDetails/${credit.id}`)}
                                             >
                                                 Ver Detalles
                                             </Button>
