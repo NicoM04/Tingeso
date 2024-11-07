@@ -37,8 +37,15 @@ public class CreditService {
     public CreditEntity saveCredit(CreditEntity credit) {
         // Calcular el pago mensual
         double monthlyPayment = calculateMonthlyPayment(credit.getAmount(), credit.getInterestRate(), credit.getDueDate());
-        // Asignar el pago mensual calculado al crédito
         credit.setMonthlyPayment(monthlyPayment);
+
+        // Calcular el costo mensual
+        double monthlyCost = calculateMonthlyCost(monthlyPayment, credit.getAmount());
+
+        // Calcular el costo total
+        double totalCost = calculateTotalCost(monthlyCost, credit.getDueDate(), credit.getAmount());
+        credit.setTotalCost(totalCost);
+
         return creditRepository.save(credit);
     }
     public ArrayList<CreditEntity> getAllCredits() {
@@ -79,6 +86,19 @@ public class CreditService {
 
         // Fórmula para calcular la cuota mensual
         return (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -numberOfPayments));
+    }
+    // Nuevo método para calcular el costo mensual según las reglas especificadas
+    public double calculateMonthlyCost(double monthlyPayment, int amount) {
+        double additionalCost = (0.03 / 100) * amount + 20000;  // 0.03% de amount + 20000
+        return monthlyPayment + additionalCost;
+    }
+
+    // Nuevo método para calcular el costo total del crédito según las reglas especificadas
+    public double calculateTotalCost(double monthlyCost, int termInYears, int amount) {
+        int numberOfPayments = termInYears * 12;
+        double baseTotalCost = monthlyCost * numberOfPayments;
+        double additionalTotalCost = (1 / 100.0) * amount;  // 1% de amount
+        return baseTotalCost + additionalTotalCost;
     }
 
     // Realizar la simulación del crédito

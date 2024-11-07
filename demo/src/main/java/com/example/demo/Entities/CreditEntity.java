@@ -21,7 +21,8 @@ public class CreditEntity {
     private int dueDate;  // years
     private double interestRate; //years
     private double monthlyPayment;  // Cuota mensual calculada
-    private int state; // "Simulacion", "Solicitado", "Aprobado", "Rechazado", "Activo"
+    private double totalCost; // Costo total del crédito
+    private int state;
     private Long idClient;
 
 }
