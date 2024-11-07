@@ -25,7 +25,7 @@ public class CreditRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        credit = new CreditEntity(1L, 1, 10000, 5, 3.5, 0, 1, 123L);
+        credit = new CreditEntity(1L, 1, 10000, 5, 3.5, 0,800, 1, 123L);
     }
 
     @Test

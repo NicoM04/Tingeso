@@ -40,7 +40,7 @@ class CreditControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        credit = new CreditEntity(1L, 1, 10000, 5, 5.0, 0.0, 1, 1L);
+        credit = new CreditEntity(1L, 1, 10000, 5, 5.0, 0.0,800.0, 1, 1L);
         user = new UserEntity();
         user.setId(1L);
         user.setName("Test User");
