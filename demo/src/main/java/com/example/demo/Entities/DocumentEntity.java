@@ -20,6 +20,5 @@ public class DocumentEntity {
     private Long creditId;  // ID del crédito asociado
 
     @Lob
-    @Column(columnDefinition = "BLOB")
     private byte[] fileData;  // Contenido del archivo en formato byte[]
 }

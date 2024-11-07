@@ -79,9 +79,11 @@ public class DocumentController {
         // Crear recurso de bytes para descargar
         ByteArrayResource resource = new ByteArrayResource(document.getFileData());
 
-        // Configurar el tipo MIME y el nombre del archivo
-        String contentType = "application/octet-stream"; // Tipo por defecto si no se puede determinar
-        String fileName = document.getFileName();
+        // Forzar el tipo MIME a PDF y establecer la extensión si no está en el nombre del archivo
+        String contentType = "application/pdf";
+        String fileName = document.getFileName().toLowerCase().endsWith(".pdf") ?
+                document.getFileName() :
+                document.getFileName() + ".pdf";
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -89,6 +91,7 @@ public class DocumentController {
                 .contentLength(document.getFileData().length)
                 .body(resource);
     }
+
 
     /**
      * Endpoint para obtener todos los documentos.
