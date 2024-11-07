@@ -12,7 +12,8 @@ import DocumentUpload from './components/DocumentUpload';
 import CreditRequestDetail from './components/CreditRequestDetail';
 import CreditRequestsTable from './components/CreditRequestsTable';
 import UserCreditTable from './components/UserCreditTable';
-import UserCreditDetails from './components/UserCreditDetails';
+import CreditDetails from './components/UserCreditDetails';
+
 //import { Login } from '@mui/icons-material';
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
               <Route path="/creditRequestDetail/:creditId" element={<CreditRequestDetail />} />
               <Route path="/creditRequestTable" element={<CreditRequestsTable/>} />
               <Route path="/userCreditTable" element={<UserCreditTable/>} />
-              <Route path="/userCreditDetails/:creditId" element={<UserCreditDetails />} />
+              <Route path="/userCreditDetails/:creditId" element={<CreditDetails />} />
               <Route path="/upload-documents/:creditId" element={<DocumentUpload />} />
               <Route path="/login" element={<Login/>} />
               <Route path="/register" element={<Register/>} />

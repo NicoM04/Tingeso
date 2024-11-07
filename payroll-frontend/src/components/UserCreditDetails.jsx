@@ -65,11 +65,6 @@ const CreditDetails = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle1">
-                <strong>Costo Total:</strong> ${credit.totalCost}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">
                 <strong>Fecha de Solicitud:</strong> {new Date(credit.requestDate).toLocaleDateString()}
               </Typography>
             </Grid>
@@ -92,4 +87,4 @@ const CreditDetails = () => {
   );
 };
 
-export default UserCreditDetails;
+export default CreditDetails;
