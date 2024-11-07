@@ -223,7 +223,7 @@ const CreditRequestDetail = () => {
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Tipo de Crédito:</strong> {credit.typeLoan ? credit.typeLoan : 'Cargando...'}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Estado:</strong> {credit.state}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Monto Solicitado:</strong> ${credit.amount}</Typography></Grid>
-              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Costo Total:</strong> ${credit.totalCost}</Typography></Grid>
+              <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Costo Total:</strong> ${Number(credit.totalCost).toFixed(0)}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Fecha de Solicitud:</strong> {new Date(credit.requestDate).toLocaleDateString()}</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Plazo:</strong> {credit.dueDate ? credit.dueDate : 'Cargando...'} años</Typography></Grid>
               <Grid item xs={12} sm={6}><Typography variant="subtitle1"><strong>Tasa de Interés:</strong> {credit.interestRate}%</Typography></Grid>

@@ -65,6 +65,11 @@ const CreditDetails = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle1">
+                <strong>Costo Total:</strong> ${Number(credit.totalCost).toFixed(0)}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle1">
                 <strong>Fecha de Solicitud:</strong> {new Date(credit.requestDate).toLocaleDateString()}
               </Typography>
             </Grid>
