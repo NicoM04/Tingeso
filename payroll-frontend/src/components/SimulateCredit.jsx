@@ -44,24 +44,32 @@ const SimulateCredit = () => {
         return Object.keys(tempErrors).length === 0;
     };
 
-    // Manejar el envío del formulario
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validate()) {
-            return;
-        }
-        setLoading(true);
-        setResult(null);
+// Manejar el envío del formulario
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) {
+        return;
+    }
+    setLoading(true);
+    setResult(null);
 
-        try {
-            const response = await creditService.simulateCredit(creditData);
-            setResult(response.data);
-        } catch (error) {
-            setResult({ error: "Failed to simulate the credit" });
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+        // Logs para depurar los valores de entrada
+        console.log("Simulating credit with the following data:");
+        console.log("Amount:", creditData.amount);
+        console.log("Interest Rate:", creditData.interestRate);
+        console.log("Due Date:", creditData.dueDate);
+
+        const response = await creditService.simulateCredit(creditData);
+        setResult(response.data);
+    } catch (error) {
+        console.error("Error in simulateCredit:", error);
+        setResult({ error: "Failed to simulate the credit" });
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     return (
         <Grid container justifyContent="center" alignItems="center" style={{ minHeight: '100vh' }}>
