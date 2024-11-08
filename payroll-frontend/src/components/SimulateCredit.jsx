@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CreditService from '../services/credit.service';
 import { 
     TextField, 
     Button, 
@@ -60,7 +61,7 @@ const handleSubmit = async (e) => {
         console.log("Interest Rate:", creditData.interestRate);
         console.log("Due Date:", creditData.dueDate);
 
-        const response = await creditService.simulateCredit(creditData);
+        const response = await CreditService.simulateCredit(creditData);
         setResult(response.data);
     } catch (error) {
         console.error("Error in simulateCredit:", error);
