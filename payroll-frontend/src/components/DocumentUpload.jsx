@@ -1,20 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Paper, Typography, Button, Box, Input } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { useParams, useNavigate } from 'react-router-dom';
 import DocumentService from '../services/document.service';
+import CreditService from '../services/credit.service'; // Importa el servicio de crédito
 
 const DocumentUpload = () => {
     const { creditId } = useParams();
-    const navigate = useNavigate(); // Crea una instancia de navigate
+    const navigate = useNavigate();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [requiredDocuments, setRequiredDocuments] = useState([]); // Almacena los documentos requeridos
 
-    const requiredDocuments = [
-        "Comprobante de ingresos", 
-        "Certificado de avalúo", 
-        "Historial crediticio"
-    ];
+    // Obtener los documentos requeridos según el tipo de crédito
+    const fetchCreditTypeDocuments = async () => {
+        try {
+            const creditResponse = await CreditService.get(creditId); // Obtiene el crédito por ID
+            const creditType = creditResponse.data.typeLoan; // Asumiendo que 'type' es el tipo de crédito
+
+            // Dependiendo del tipo de crédito, se definen los documentos requeridos
+            switch (creditType) {
+                case 1:
+                    setRequiredDocuments([
+                        "Comprobante de ingresos", 
+                        "Certificado de avalúo", 
+                        "Historial crediticio"
+                    ]);
+                    break;
+                case 2:
+                    setRequiredDocuments([
+                        "Comprobante de ingresos", 
+                        "Certificado de avalúo", 
+                        "Escritura de la primera vivienda",
+                        "Historial crediticio"
+                    ]);
+                    break;
+                case 3:
+                    setRequiredDocuments([
+                        "Estado financiero del negocio",
+                        "Comprobante de ingresos", 
+                        "Certificado de avalúo", 
+                        "Plan de negocios"
+                    ]);
+                    break;
+                case 4:
+                    setRequiredDocuments([
+                        "Comprobante de ingresos", 
+                        "Presupuesto de la remodelación", 
+                        "Certificado de avalúo actualizado"
+                    ]);
+                    break;
+                default:
+                    setRequiredDocuments([]); // Si no se encuentra el tipo de crédito
+            }
+        } catch (err) {
+            setError("Error al obtener el crédito: " + err.message);
+            console.error('Error al obtener el crédito:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchCreditTypeDocuments(); // Al montar el componente, obtenemos los documentos requeridos
+    }, [creditId]); // Re-ejecutamos cuando el creditId cambia
 
     const handleFileChange = (event, index) => {
         const newDocuments = [...documents];
@@ -38,7 +85,7 @@ const DocumentUpload = () => {
             alert("Documentos subidos correctamente.");
 
             // Redirigir a la página de inicio después de subir documentos
-            navigate('/home'); // Cambia esta línea para redirigir a la página de inicio
+            navigate('/home');
 
         } catch (err) {
             setError("Error al subir documentos: " + err.message);
@@ -56,17 +103,23 @@ const DocumentUpload = () => {
                         Subir Documentos
                     </Typography>
 
-                    {requiredDocuments.map((doc, index) => (
-                        <Box key={index} mt={2}>
-                            <Typography>{doc}:</Typography>
-                            <Input
-                                type="file"
-                                onChange={(event) => handleFileChange(event, index)}
-                                fullWidth
-                                required
-                            />
-                        </Box>
-                    ))}
+                    {requiredDocuments.length === 0 ? (
+                        <Typography color="error" align="center">
+                            No se pudieron cargar los documentos requeridos.
+                        </Typography>
+                    ) : (
+                        requiredDocuments.map((doc, index) => (
+                            <Box key={index} mt={2}>
+                                <Typography>{doc}:</Typography>
+                                <Input
+                                    type="file"
+                                    onChange={(event) => handleFileChange(event, index)}
+                                    fullWidth
+                                    required
+                                />
+                            </Box>
+                        ))
+                    )}
 
                     {error && (
                         <Typography color="error" mt={2}>
