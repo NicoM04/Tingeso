@@ -5,7 +5,9 @@ import {
   Paper,
   Typography,
   Grid,
-  Divider
+  Divider,
+  Button,
+  Box
 } from '@mui/material';
 
 const CreditDetails = () => {
@@ -30,6 +32,26 @@ const CreditDetails = () => {
       fetchCreditDetails();
     }
   }, [creditId]);
+
+  // Función para cancelar el crédito
+  const handleCancelCredit = async () => {
+    try {
+      await CreditService.updateCreditStatus(creditId, 8); // 8 representa "Cancelada por el Cliente"
+      setCredit({ ...credit, state: 8 }); // Actualiza el estado localmente
+    } catch (error) {
+      console.error('Error canceling credit:', error);
+    }
+  };
+
+  // Función para aprobar el crédito
+  const handleApproveCredit = async () => {
+    try {
+      await CreditService.updateCreditStatus(creditId, 5); // 5 representa "En Aprobación Final"
+      setCredit({ ...credit, state: 5 }); // Actualiza el estado localmente
+    } catch (error) {
+      console.error('Error approving credit:', error);
+    }
+  };
 
   return (
     <div style={{ padding: '20px' }}>
@@ -84,6 +106,26 @@ const CreditDetails = () => {
               </Typography>
             </Grid>
           </Grid>
+          <Box display="flex" justifyContent="space-between" mt={3}>
+            {/* Botón para cancelar crédito */}
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              onClick={handleCancelCredit}
+            >
+              Cancelar Crédito
+            </Button>
+            {/* Botón para aprobar crédito solo si el estado es "Pre-Aprobada" */}
+            {credit.state === 4 && (
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={handleApproveCredit}
+              >
+                Aprobar Crédito
+              </Button>
+            )}
+          </Box>
         </Paper>
       ) : (
         <Typography variant="body1">Cargando información del crédito...</Typography>
