@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const creditTypes = [
     { id: 1, name: "Primera Vivienda", maxTerm: 30, interestRate: "3.5%-5%" },
-    { id: 2, name: "Segunda Vivienda", maxTerm: 20, interestRate: "4%-6%" },
+    { id: 2, name: "2do Vivienda", maxTerm: 20, interestRate: "4%-6%" },
     { id: 3, name: "Tercera Vivienda", maxTerm: 25, interestRate: "5%-7%" },
     { id: 4, name: "Cuarta Vivienda", maxTerm: 15, interestRate: "4.5%-6%" },
 ];
